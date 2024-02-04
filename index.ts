@@ -1,5 +1,5 @@
 import prompts from "prompts";
-import { Client } from "discord.js-selfbot-v13";
+import { Client, StageChannel } from "discord.js-selfbot-v13";
 import {
     MediaUdp,
     setStreamOpts,
@@ -18,7 +18,7 @@ async function playVideo(video: string, udpConn: MediaUdp) {
         console.log(metadata);
         const videoStream = metadata.streams.find((value) => value.codec_type === 'video' && value.codec_name === "h264" && value.pix_fmt === 'yuv420p');
         // @ts-ignore
-        if (videoStream) //only supports those profiles
+        if (videoStream && !video.includes("ttvnw.net")) //only supports those profiles
         {
             // lets copy the video instead
             console.log('copying codec');
@@ -91,6 +91,12 @@ streamer.client.on("messageCreate", async (message) => {
 
         command?.kill("SIGINT")
         await streamer.joinVoice(guildId, channel.id);
+
+        if(channel instanceof StageChannel)
+        {
+            await streamer.client.user!.voice!.setSuppressed(false);
+        }
+
         try {
             const udpConn = await streamer.createStream();
             await playVideo(url, udpConn);
