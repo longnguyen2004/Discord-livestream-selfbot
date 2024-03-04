@@ -5,23 +5,38 @@ import {
     VideoStream,
     MediaUdp,
     H264NalSplitter,
+    H265NalSplitter,
     IvfTransformer,
     streamOpts
 } from "@dank074/discord-video-stream";
 import { StreamOutput } from '@dank074/fluent-ffmpeg-multistream-ts';
 import { Readable, Transform, PassThrough } from 'stream';
 import { Worker } from 'worker_threads';
+import { Utils } from '@dank074/discord-video-stream';
 
 export let command: ffmpeg.FfmpegCommand | undefined;
 
-export function streamLivestreamVideo(input: string | Readable, mediaUdp: MediaUdp, includeAudio = true, copyH264Codec = false) {
+export function streamLivestreamVideo(input: string | Readable, mediaUdp: MediaUdp, includeAudio = true, copyCodec = false) {
     return new Promise<string>((resolve, reject) => {
         let videoOutput: Transform;
+        let videoCodec = Utils.normalizeVideoCodec(streamOpts.video_codec!);
+        console.log(videoCodec);
 
-        if (streamOpts.video_codec === 'H264') {
-            videoOutput = new H264NalSplitter();
-        } else {
-            videoOutput = new IvfTransformer();
+        switch (videoCodec) {
+            case "H264":
+                videoOutput = new H264NalSplitter();
+                break;
+
+            case "H265":
+                videoOutput = new H265NalSplitter();
+                break;
+
+            case "VP8":
+                videoOutput = new IvfTransformer();
+                break;
+
+            default:
+                throw new Error("Not supported");
         }
 
         const headers: map = {
@@ -38,7 +53,7 @@ export function streamLivestreamVideo(input: string | Readable, mediaUdp: MediaU
             isHls = input.includes('m3u');
         }
 
-        const videoStream: VideoStream = new VideoStream(mediaUdp, streamOpts.fps, false);
+        const videoStream = new VideoStream(mediaUdp, streamOpts.fps, true);
 
         try {
             command = ffmpeg(input)
@@ -55,7 +70,7 @@ export function streamLivestreamVideo(input: string | Readable, mediaUdp: MediaU
                 .on("error", (err, stdout, stderr) => {
                     command = undefined;
                     reject(new Error(
-`
+                        `
 Cannot play video: ${err.message}
 `
                     ));
@@ -68,46 +83,78 @@ Cannot play video: ${err.message}
                     "-buffer_size", "4194304",
                     "-err_detect", "ignore_err"
                 );
-            if (streamOpts.video_codec === 'VP8') {
-                command.output(StreamOutput(videoOutput).url, { end: false })
-                    .addOption(["-map 0:v"])
-                    .size(`${streamOpts.width}x${streamOpts.height}`)
-                    .fpsOutput(streamOpts.fps!)
-                    .videoBitrate(`${streamOpts.bitrateKbps}k`)
-                    .format('ivf')
-                    .outputOption('-deadline', 'realtime');
-            } else {
-                if (copyH264Codec) {
-                    command.output(StreamOutput(videoOutput).url, { end: false })
-                        .addOption(["-map 0:v"])
-                        .videoCodec('copy')
-                        .format('h264')
-                        .outputOptions([
-                            '-bsf:v h264_metadata=aud=insert'
-                        ]);
-                } else {
+            switch (videoCodec) {
+                case "H264":
+                    if (copyCodec) {
+                        command.output(StreamOutput(videoOutput).url, { end: false })
+                            .addOption(["-map 0:v"])
+                            .videoCodec('copy')
+                            .format('h264')
+                            .outputOptions([
+                                '-bsf:v h264_metadata=aud=insert'
+                            ]);
+                    } else {
+                        command.output(StreamOutput(videoOutput).url, { end: false })
+                            .addOption(["-map 0:v"])
+                            .size(`${streamOpts.width}x${streamOpts.height}`)
+                            .fpsOutput(streamOpts.fps!)
+                            .videoBitrate(`${streamOpts.bitrateKbps}k`)
+                            .format('h264')
+                            .outputOptions([
+                                '-tune zerolatency',
+                                '-pix_fmt yuv420p',
+                                '-preset ultrafast',
+                                '-profile:v baseline',
+                                `-g ${streamOpts.fps}`,
+                                `-x264-params keyint=${streamOpts.fps}:min-keyint=${streamOpts.fps}`,
+                                '-bsf:v h264_metadata=aud=insert'
+                            ]);
+                    }
+                    break;
+
+                case "H265":
+                    if (copyCodec) {
+                        command.output(StreamOutput(videoOutput).url, { end: false })
+                            .addOption(["-map 0:v"])
+                            .videoCodec('copy')
+                            .format('hevc')
+                            .outputOptions([
+                                '-bsf:v hevc_metadata=aud=insert'
+                            ]);
+                    } else {
+                        command.output(StreamOutput(videoOutput).url, { end: false })
+                            .addOption(["-map 0:v"])
+                            .size(`${streamOpts.width}x${streamOpts.height}`)
+                            .fpsOutput(streamOpts.fps!)
+                            .videoBitrate(`${streamOpts.bitrateKbps}k`)
+                            .format('hevc')
+                            .outputOptions([
+                                '-tune zerolatency',
+                                '-pix_fmt yuv420p',
+                                '-preset ultrafast',
+                                '-profile:v baseline',
+                                `-g ${streamOpts.fps}`,
+                                `-x265-params keyint=${streamOpts.fps}:min-keyint=${streamOpts.fps}`,
+                                '-bsf:v hevc_metadata=aud=insert'
+                            ]);
+                    }
+                    break;
+
+                default:
                     command.output(StreamOutput(videoOutput).url, { end: false })
                         .addOption(["-map 0:v"])
                         .size(`${streamOpts.width}x${streamOpts.height}`)
                         .fpsOutput(streamOpts.fps!)
                         .videoBitrate(`${streamOpts.bitrateKbps}k`)
-                        .format('h264')
-                        .outputOptions([
-                            '-tune zerolatency',
-                            '-pix_fmt yuv420p',
-                            '-preset ultrafast',
-                            '-profile:v baseline',
-                            `-g ${streamOpts.fps}`,
-                            `-x264-params keyint=${streamOpts.fps}:min-keyint=${streamOpts.fps}`,
-                            '-bsf:v h264_metadata=aud=insert'
-                        ]);
-                }
+                        .format('ivf')
+                        .outputOption('-deadline', 'realtime');
+                    break;
             }
 
             videoOutput.pipe(videoStream, { end: false });
 
             if (includeAudio) {
-                const audioStream: AudioStream = new AudioStream(mediaUdp, false);
+                const audioStream = new AudioStream(mediaUdp, true);
 
                 command
                     .output(StreamOutput(audioStream).url, { end: false })
