@@ -9,39 +9,38 @@ import {
 } from "@dank074/discord-video-stream";
 import { command, streamLivestreamVideo } from "./customStream.js";
 
-async function playVideo(video: string, udpConn: MediaUdp) {
+async function getVideoInfo(video: string) {
     let includeAudio = true;
-    let copyH264Codec = false;
+    let copyCodec = false;
 
-    try {
-        const metadata = await getInputMetadata(video);
-        console.log(metadata);
-        const videoStream = metadata.streams.find((value) => value.codec_type === 'video' && value.codec_name === "h264" && value.pix_fmt === 'yuv420p');
-        // @ts-ignore
-        if (videoStream && !video.includes("ttvnw.net")) //only supports those profiles
-        {
-            // lets copy the video instead
-            console.log('copying codec');
-            copyH264Codec = true;
-            const fps = parseInt(videoStream.r_frame_rate!.split('/')[0]) / parseInt(videoStream.r_frame_rate!.split('/')[1]);
-            const width = videoStream.width;
-            const height = videoStream.height;
-            console.log(fps, width, height, Number(videoStream.profile));
-            setStreamOpts({ fps, width, height });
-        }
-        //console.log(JSON.stringify(metadata.streams));
-        includeAudio = inputHasAudio(metadata);
-    } catch (e) {
-        console.log(e);
-        return;
+    const metadata = await getInputMetadata(video);
+    console.log(metadata);
+    const videoStream = metadata.streams.find((value) => value.codec_type === 'video' && value.pix_fmt === 'yuv420p');
+    // @ts-ignore
+    if (videoStream && ["h264", "hevc"].includes(videoStream.codec_name) && !video.includes("ttvnw.net")) //only supports those profiles
+    {
+        // lets copy the video instead
+        console.log('copying codec');
+        copyCodec = true;
+        const fps = parseInt(videoStream.r_frame_rate!.split('/')[0]) / parseInt(videoStream.r_frame_rate!.split('/')[1]);
+        const width = videoStream.width;
+        const height = videoStream.height;
+        console.log(fps, width, height, Number(videoStream.profile));
+        setStreamOpts({ fps, width, height, video_codec: videoStream.codec_name });
     }
+    //console.log(JSON.stringify(metadata.streams));
+    includeAudio = inputHasAudio(metadata);
 
+    return { includeAudio, copyCodec };
+}
+
+async function playVideo(video: string, udpConn: MediaUdp, includeAudio: boolean, copyCodec: boolean) {
     console.log("Started playing video");
 
     udpConn.mediaConnection.setSpeaking(true);
     udpConn.mediaConnection.setVideoStatus(true);
     try {
-        const res = await streamLivestreamVideo(video, udpConn, includeAudio, copyH264Codec);
+        const res = await streamLivestreamVideo(video, udpConn, includeAudio, copyCodec);
 
         console.log("Finished playing video " + res);
     } finally {
@@ -73,18 +72,16 @@ streamer.client.on("messageCreate", async (message) => {
 
     if (!allowedId.includes(message.author.id))
         return;
-    
+
     if (!message.content)
         return;
 
-    if (message.content.startsWith("$$play"))
-    {
+    if (message.content.startsWith("$$play")) {
         const url = message.content.split(" ")[1];
         if (!url) return;
         const guildId = message.guildId!;
         const channel = message.author.voice?.channel;
-        if (!channel)
-        {
+        if (!channel) {
             message.reply("Please join a voice channel first!");
             return;
         }
@@ -92,38 +89,34 @@ streamer.client.on("messageCreate", async (message) => {
         command?.kill("SIGINT")
         await streamer.joinVoice(guildId, channel.id);
 
-        if(channel instanceof StageChannel)
-        {
+        if (channel instanceof StageChannel) {
             await streamer.client.user!.voice!.setSuppressed(false);
         }
 
         try {
+            const { includeAudio, copyCodec } = await getVideoInfo(url);
             const udpConn = await streamer.createStream();
-            await playVideo(url, udpConn);
+            await playVideo(url, udpConn, includeAudio, copyCodec);
         }
-        catch (e)
-        {
+        catch (e) {
             const error = e as Error;
             message.reply(
-`Oops, something bad happened
+                `Oops, something bad happened
 
 \`\`\`
 ${error.message}
 \`\`\``
-)
+            )
         }
-        finally
-        {
+        finally {
             streamer.stopStream();
         }
     }
-    else if (message.content.startsWith("$$stop"))
-    {
+    else if (message.content.startsWith("$$stop")) {
         command?.kill("SIGINT");
         streamer.stopStream();
     }
-    else if (message.content.startsWith("$$disconnect"))
-    {
+    else if (message.content.startsWith("$$disconnect")) {
         command?.kill("SIGINT");
         streamer.leaveVoice();
     }
