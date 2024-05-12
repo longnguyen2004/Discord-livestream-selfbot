@@ -7,19 +7,22 @@ import {
     H264NalSplitter,
     H265NalSplitter,
     IvfTransformer,
-    streamOpts
 } from "@dank074/discord-video-stream";
 import { StreamOutput } from '@dank074/fluent-ffmpeg-multistream-ts';
 import { Readable, Transform, PassThrough } from 'stream';
-import { Worker } from 'worker_threads';
-import { Utils } from '@dank074/discord-video-stream';
+import PCancelable from 'p-cancelable';
 
-export let command: ffmpeg.FfmpegCommand | undefined;
-
-export function streamLivestreamVideo(input: string | Readable, mediaUdp: MediaUdp, includeAudio = true, copyCodec = false) {
-    return new Promise<string>((resolve, reject) => {
+export function streamLivestreamVideo(
+    input: string | Readable,
+    mediaUdp: MediaUdp,
+    includeAudio = true,
+    copyCodec = false,
+    isRealtime = false
+) {
+    const streamOpts = mediaUdp.mediaConnection.streamOptions;
+    return new PCancelable<string>((resolve, reject, onCancel) => {
         let videoOutput: Transform;
-        let videoCodec = Utils.normalizeVideoCodec(streamOpts.video_codec!);
+        let videoCodec = streamOpts.videoCodec;
         console.log(videoCodec);
 
         switch (videoCodec) {
@@ -32,6 +35,7 @@ export function streamLivestreamVideo(input: string | Readable, mediaUdp: MediaU
                 break;
 
             case "VP8":
+            case "AV1":
                 videoOutput = new IvfTransformer();
                 break;
 
@@ -46,29 +50,28 @@ export function streamLivestreamVideo(input: string | Readable, mediaUdp: MediaU
 
         let isHttpUrl = false;
         let isHls = false;
-        let isRealtime = false;
 
         if (typeof input === "string") {
             isHttpUrl = input.startsWith('http') || input.startsWith('https');
             isHls = input.includes('m3u');
         }
 
-        const videoStream = new VideoStream(mediaUdp, streamOpts.fps, true);
+        const videoStream = new VideoStream(mediaUdp, streamOpts.fps, isRealtime);
 
         try {
-            command = ffmpeg(input)
+            const command = ffmpeg(input)
                 .addInputOption(
-                    "-loglevel", "error",
+                    "-loglevel", "warning",
+                    "-stats",
                     "-flags", "low_delay",
                     "-analyzeduration", "0",
-                    "-thread_queue_size", "10"
+                    "-thread_queue_size", "100",
+                    "-hwaccel", "nvdec"
                 )
                 .on('end', () => {
-                    command = undefined;
                     resolve("video ended");
                 })
                 .on("error", (err, stdout, stderr) => {
-                    command = undefined;
                     reject(new Error(
                         `
 Cannot play video: ${err.message}
@@ -96,17 +99,19 @@ Cannot play video: ${err.message}
                     } else {
                         command.output(StreamOutput(videoOutput).url, { end: false })
                             .addOption(["-map 0:v"])
-                            .size(`${streamOpts.width}x${streamOpts.height}`)
+                            .videoFilter(`scale=${streamOpts.width}:${streamOpts.height}`)
                             .fpsOutput(streamOpts.fps!)
                             .videoBitrate(`${streamOpts.bitrateKbps}k`)
+                            .videoCodec("h264_nvenc")
                             .format('h264')
                             .outputOptions([
-                                '-tune zerolatency',
+                                '-noautoscale',
+                                '-bf 0',
                                 '-pix_fmt yuv420p',
-                                '-preset ultrafast',
+                                '-preset p3',
                                 '-profile:v baseline',
                                 `-g ${streamOpts.fps}`,
-                                `-x264-params keyint=${streamOpts.fps}:min-keyint=${streamOpts.fps}`,
+                                '-maxrate:v 7000k',
                                 '-bsf:v h264_metadata=aud=insert'
                             ]);
                     }
@@ -140,7 +145,7 @@ Cannot play video: ${err.message}
                     }
                     break;
 
-                default:
+                case "VP8":
                     command.output(StreamOutput(videoOutput).url, { end: false })
                         .addOption(["-map 0:v"])
                         .size(`${streamOpts.width}x${streamOpts.height}`)
@@ -149,12 +154,28 @@ Cannot play video: ${err.message}
                         .format('ivf')
                         .outputOption('-deadline', 'realtime');
                     break;
+
+                case "AV1":
+                    if (copyCodec)
+                        command.output(StreamOutput(videoOutput).url, { end: false })
+                            .addOption(["-map 0:v"])
+                            .videoCodec("copy")
+                            .format('ivf')
+                    else
+                        command.output(StreamOutput(videoOutput).url, { end: false })
+                            .addOption(["-map 0:v"])
+                            .size(`${streamOpts.width}x${streamOpts.height}`)
+                            .fpsOutput(streamOpts.fps!)
+                            .videoBitrate(`${streamOpts.bitrateKbps}k`)
+                            .videoCodec("libsvtav1")
+                            .format('ivf')
+                    break;
             }
 
             videoOutput.pipe(videoStream, { end: false });
 
             if (includeAudio) {
-                const audioStream = new AudioStream(mediaUdp, true);
+                const audioStream = new AudioStream(mediaUdp, isRealtime);
 
                 command
                     .output(StreamOutput(audioStream).url, { end: false })
@@ -167,7 +188,7 @@ Cannot play video: ${err.message}
                     .format("data")
             }
 
-            if (streamOpts.hardware_acceleration) command.inputOption('-hwaccel', 'auto');
+            if (streamOpts.hardwareAcceleratedDecoding) command.inputOption('-hwaccel', 'auto');
 
             if (isHttpUrl) {
                 command.inputOption('-headers',
@@ -184,10 +205,10 @@ Cannot play video: ${err.message}
             }
 
             command.run();
+            onCancel(() => command.kill("SIGINT"))
         } catch (e) {
             //audioStream.end();
             //videoStream.end();
-            command = undefined;
             reject(new Error("cannot play video " + e.message));
         }
     });
