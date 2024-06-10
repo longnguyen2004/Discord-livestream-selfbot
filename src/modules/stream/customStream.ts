@@ -1,5 +1,4 @@
 import ffmpeg from 'fluent-ffmpeg';
-import prism from "prism-media";
 import {
     AudioStream,
     VideoStream,
@@ -9,11 +8,11 @@ import {
     IvfTransformer,
 } from "@dank074/discord-video-stream";
 import { StreamOutput } from '@dank074/fluent-ffmpeg-multistream-ts';
-import { Readable, Transform, PassThrough } from 'stream';
+import { Readable, Transform } from 'stream';
 import PCancelable from 'p-cancelable';
 
 export function streamLivestreamVideo(
-    input: string | Readable,
+    input: string,
     mediaUdp: MediaUdp,
     includeAudio = true,
     copyCodec = false,
@@ -61,7 +60,6 @@ export function streamLivestreamVideo(
         try {
             const command = ffmpeg(input)
                 .addInputOption(
-                    "-loglevel", "warning",
                     "-stats",
                     "-flags", "low_delay",
                     "-analyzeduration", "0",
@@ -77,8 +75,7 @@ export function streamLivestreamVideo(
 Cannot play video: ${err.message}
 `
                     ));
-                })
-                .on('stderr', console.error);
+                });
 
             if (input.startsWith("rtsp://"))
                 command.addInputOption(

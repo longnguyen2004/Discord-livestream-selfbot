@@ -131,3 +131,6 @@ dist
 
 # token file
 token
+
+# build directory
+build
