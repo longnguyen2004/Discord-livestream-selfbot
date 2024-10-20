@@ -1,14 +1,12 @@
 import ffmpeg from 'fluent-ffmpeg';
+import { demux } from '@dank074/discord-video-stream';
 import {
     AudioStream,
     VideoStream,
     MediaUdp,
-    H264NalSplitter,
-    H265NalSplitter,
-    IvfTransformer,
 } from "@dank074/discord-video-stream";
-import { StreamOutput } from '@dank074/fluent-ffmpeg-multistream-ts';
-import { Readable, Transform } from 'stream';
+import { Readable, PassThrough } from 'stream';
+import { pipeline } from 'stream/promises';
 import PCancelable from 'p-cancelable';
 
 export function streamLivestreamVideo(
@@ -19,28 +17,10 @@ export function streamLivestreamVideo(
     isRealtime = false
 ) {
     const streamOpts = mediaUdp.mediaConnection.streamOptions;
-    return new PCancelable<string>((resolve, reject, onCancel) => {
-        let videoOutput: Transform;
+    return new PCancelable<string>(async (resolve, reject, onCancel) => {
+        const ffmpegOutput = new PassThrough();
         let videoCodec = streamOpts.videoCodec;
         console.log(videoCodec);
-
-        switch (videoCodec) {
-            case "H264":
-                videoOutput = new H264NalSplitter();
-                break;
-
-            case "H265":
-                videoOutput = new H265NalSplitter();
-                break;
-
-            case "VP8":
-            case "AV1":
-                videoOutput = new IvfTransformer();
-                break;
-
-            default:
-                throw new Error("Not supported");
-        }
 
         const headers: map = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.3",
@@ -55,10 +35,10 @@ export function streamLivestreamVideo(
             isHls = input.includes('m3u');
         }
 
-        const videoStream = new VideoStream(mediaUdp, streamOpts.fps, isRealtime);
-
         try {
             const command = ffmpeg(input)
+                .output(ffmpegOutput)
+                .outputFormat("matroska")
                 .addInputOption(
                     "-stats",
                     "-flags", "low_delay",
@@ -69,7 +49,7 @@ export function streamLivestreamVideo(
                 .on('end', () => {
                     resolve("video ended");
                 })
-                .on("error", (err, stdout, stderr) => {
+                .on("error", (err) => {
                     reject(new Error(
                         `
 Cannot play video: ${err.message}
@@ -86,21 +66,16 @@ Cannot play video: ${err.message}
             switch (videoCodec) {
                 case "H264":
                     if (copyCodec) {
-                        command.output(StreamOutput(videoOutput).url, { end: false })
+                        command
                             .addOption(["-map 0:v"])
                             .videoCodec('copy')
-                            .format('h264')
-                            .outputOptions([
-                                '-bsf:v h264_metadata=aud=insert'
-                            ]);
                     } else {
-                        command.output(StreamOutput(videoOutput).url, { end: false })
+                        command
                             .addOption(["-map 0:v"])
                             .videoFilter(`scale=${streamOpts.width}:${streamOpts.height}`)
                             .fpsOutput(streamOpts.fps!)
                             .videoBitrate(`${streamOpts.bitrateKbps}k`)
                             .videoCodec("h264_nvenc")
-                            .format('h264')
                             .outputOptions([
                                 '-noautoscale',
                                 '-bf 0',
@@ -116,20 +91,15 @@ Cannot play video: ${err.message}
 
                 case "H265":
                     if (copyCodec) {
-                        command.output(StreamOutput(videoOutput).url, { end: false })
+                        command
                             .addOption(["-map 0:v"])
                             .videoCodec('copy')
-                            .format('hevc')
-                            .outputOptions([
-                                '-bsf:v hevc_metadata=aud=insert'
-                            ]);
                     } else {
-                        command.output(StreamOutput(videoOutput).url, { end: false })
+                        command
                             .addOption(["-map 0:v"])
                             .size(`${streamOpts.width}x${streamOpts.height}`)
                             .fpsOutput(streamOpts.fps!)
                             .videoBitrate(`${streamOpts.bitrateKbps}k`)
-                            .format('hevc')
                             .outputOptions([
                                 '-tune zerolatency',
                                 '-pix_fmt yuv420p',
@@ -143,47 +113,36 @@ Cannot play video: ${err.message}
                     break;
 
                 case "VP8":
-                    command.output(StreamOutput(videoOutput).url, { end: false })
+                    command
                         .addOption(["-map 0:v"])
                         .size(`${streamOpts.width}x${streamOpts.height}`)
                         .fpsOutput(streamOpts.fps!)
                         .videoBitrate(`${streamOpts.bitrateKbps}k`)
-                        .format('ivf')
                         .outputOption('-deadline', 'realtime');
                     break;
 
                 case "AV1":
                     if (copyCodec)
-                        command.output(StreamOutput(videoOutput).url, { end: false })
+                        command
                             .addOption(["-map 0:v"])
                             .videoCodec("copy")
-                            .format('ivf')
                     else
-                        command.output(StreamOutput(videoOutput).url, { end: false })
+                        command
                             .addOption(["-map 0:v"])
                             .size(`${streamOpts.width}x${streamOpts.height}`)
                             .fpsOutput(streamOpts.fps!)
                             .videoBitrate(`${streamOpts.bitrateKbps}k`)
                             .videoCodec("libsvtav1")
-                            .format('ivf')
                     break;
             }
 
-            videoOutput.pipe(videoStream, { end: false });
-
-            if (includeAudio) {
-                const audioStream = new AudioStream(mediaUdp, isRealtime);
-
-                command
-                    .output(StreamOutput(audioStream).url, { end: false })
-                    .addOption([
-                        "-map 0:a"
-                    ])
-                    .audioChannels(2)
-                    .audioFrequency(48000)
-                    .audioCodec("libopus")
-                    .format("data")
-            }
+            command
+                .addOption([
+                    "-map 0:a?"
+                ])
+                .audioChannels(2)
+                .audioFrequency(48000)
+                .audioCodec("libopus")
 
             if (streamOpts.hardwareAcceleratedDecoding) command.inputOption('-hwaccel', 'auto');
 
@@ -203,6 +162,18 @@ Cannot play video: ${err.message}
 
             command.run();
             onCancel(() => command.kill("SIGINT"))
+
+            const { video, audio } = await demux(ffmpegOutput);
+            console.log(video);
+            console.log(audio);
+            const videoStream = new VideoStream(mediaUdp, streamOpts.fps, isRealtime);
+            video!.stream.pipe(videoStream)
+            if (audio && includeAudio) {
+                const audioStream = new AudioStream(mediaUdp, isRealtime);
+                videoStream.syncStream = audioStream;
+                audioStream.syncStream = videoStream;
+                audio.stream.pipe(audioStream)
+            }
         } catch (e) {
             //audioStream.end();
             //videoStream.end();
