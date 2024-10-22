@@ -63,15 +63,14 @@ Cannot play video: ${err.message}
                     "-buffer_size", "4194304",
                     "-err_detect", "ignore_err"
                 );
-            switch (videoCodec) {
-                case "H264":
-                    if (copyCodec) {
+            command.addOption(["-map 0:v"]);
+            if (copyCodec) {
+                command.videoCodec('copy')
+            }
+            else {
+                switch (videoCodec) {
+                    case "H264":
                         command
-                            .addOption(["-map 0:v"])
-                            .videoCodec('copy')
-                    } else {
-                        command
-                            .addOption(["-map 0:v"])
                             .videoFilter(`scale=${streamOpts.width}:${streamOpts.height}`)
                             .fpsOutput(streamOpts.fps!)
                             .videoBitrate(`${streamOpts.bitrateKbps}k`)
@@ -86,17 +85,10 @@ Cannot play video: ${err.message}
                                 '-maxrate:v 7000k',
                                 '-bsf:v h264_metadata=aud=insert'
                             ]);
-                    }
-                    break;
+                        break;
 
-                case "H265":
-                    if (copyCodec) {
+                    case "H265":
                         command
-                            .addOption(["-map 0:v"])
-                            .videoCodec('copy')
-                    } else {
-                        command
-                            .addOption(["-map 0:v"])
                             .size(`${streamOpts.width}x${streamOpts.height}`)
                             .fpsOutput(streamOpts.fps!)
                             .videoBitrate(`${streamOpts.bitrateKbps}k`)
@@ -109,31 +101,25 @@ Cannot play video: ${err.message}
                                 `-x265-params keyint=${streamOpts.fps}:min-keyint=${streamOpts.fps}`,
                                 '-bsf:v hevc_metadata=aud=insert'
                             ]);
-                    }
-                    break;
+                        break;
 
-                case "VP8":
-                    command
-                        .addOption(["-map 0:v"])
-                        .size(`${streamOpts.width}x${streamOpts.height}`)
-                        .fpsOutput(streamOpts.fps!)
-                        .videoBitrate(`${streamOpts.bitrateKbps}k`)
-                        .outputOption('-deadline', 'realtime');
-                    break;
+                    case "VP8":
+                        command
+                            .videoCodec("libvpx")
+                            .size(`${streamOpts.width}x${streamOpts.height}`)
+                            .fpsOutput(streamOpts.fps!)
+                            .videoBitrate(`${streamOpts.bitrateKbps}k`)
+                            .outputOption('-deadline', 'realtime');
+                        break;
 
-                case "AV1":
-                    if (copyCodec)
+                    case "AV1":
                         command
-                            .addOption(["-map 0:v"])
-                            .videoCodec("copy")
-                    else
-                        command
-                            .addOption(["-map 0:v"])
                             .size(`${streamOpts.width}x${streamOpts.height}`)
                             .fpsOutput(streamOpts.fps!)
                             .videoBitrate(`${streamOpts.bitrateKbps}k`)
                             .videoCodec("libsvtav1")
-                    break;
+                        break;
+                }
             }
 
             command
