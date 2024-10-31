@@ -14,7 +14,8 @@ let defaultStreamOpts: Partial<StreamOptions> = {
   bitrateKbps: 5000,
   maxBitrateKbps: 10000,
   videoCodec: "H264",
-  rtcpSenderReportEnabled: true
+  rtcpSenderReportEnabled: true,
+  forceChacha20Encryption: true
 };
 
 export default {
