@@ -6,7 +6,6 @@ import {
     MediaUdp,
 } from "@dank074/discord-video-stream";
 import { Readable, PassThrough } from 'stream';
-import { pipeline } from 'stream/promises';
 import PCancelable from 'p-cancelable';
 
 export function streamLivestreamVideo(
@@ -43,7 +42,9 @@ export function streamLivestreamVideo(
                     "-flags", "low_delay",
                     "-analyzeduration", "0",
                     "-thread_queue_size", "4096",
-                    "-hwaccel", "nvdec"
+                    "-fflags", "flush_packets",
+                    "-flush_packets", "1"
+                    // "-hwaccel", "nvdec"
                 )
                 .on('start', function(cmd) {
                     console.log(`Command line: ${cmd}`)
@@ -61,8 +62,8 @@ Cannot play video: ${err.message}
 `
                     ));
                 });
-            command = command.addInputOption("-re");
-
+            let isRealTime = /(rtsp|rtmp|srt):\/\//.test(input);
+                
             if (input.startsWith("rtsp://"))
                 command = command.addInputOption(
                     "-buffer_size", "4194304",
@@ -73,12 +74,14 @@ Cannot play video: ${err.message}
                 command = command.videoCodec('copy')
             }
             else {
+                command = command
+                    .addOutputOption("-force_key_frames", "expr:gte(t,n_forced*1)")
+                    .videoFilter(`scale=${streamOpts.width}:${streamOpts.height}`)
+                    .fpsOutput(streamOpts.fps!)
+                    .videoBitrate(`${streamOpts.bitrateKbps}k`)
                 switch (videoCodec) {
                     case "H264":
                         command = command
-                            .videoFilter(`scale=${streamOpts.width}:${streamOpts.height}`)
-                            .fpsOutput(streamOpts.fps!)
-                            .videoBitrate(`${streamOpts.bitrateKbps}k`)
                             .videoCodec("h264_nvenc")
                             .outputOptions([
                                 '-noautoscale',
@@ -86,42 +89,30 @@ Cannot play video: ${err.message}
                                 '-pix_fmt yuv420p',
                                 '-preset p3',
                                 '-profile:v baseline',
-                                `-g ${streamOpts.fps}`,
+                                '-b:v 7000k',
                                 '-maxrate:v 7000k',
-                                '-bsf:v h264_metadata=aud=insert'
                             ]);
                         break;
 
                     case "H265":
                         command = command
-                            .size(`${streamOpts.width}x${streamOpts.height}`)
-                            .fpsOutput(streamOpts.fps!)
-                            .videoBitrate(`${streamOpts.bitrateKbps}k`)
+                            .videoCodec("hevc_nvenc")
                             .outputOptions([
                                 '-tune zerolatency',
                                 '-pix_fmt yuv420p',
                                 '-preset ultrafast',
                                 '-profile:v baseline',
-                                `-g ${streamOpts.fps}`,
-                                `-x265-params keyint=${streamOpts.fps}:min-keyint=${streamOpts.fps}`,
-                                '-bsf:v hevc_metadata=aud=insert'
                             ]);
                         break;
 
                     case "VP8":
                         command = command
                             .videoCodec("libvpx")
-                            .size(`${streamOpts.width}x${streamOpts.height}`)
-                            .fpsOutput(streamOpts.fps!)
-                            .videoBitrate(`${streamOpts.bitrateKbps}k`)
                             .outputOption('-deadline', 'realtime');
                         break;
 
                     case "AV1":
                         command = command
-                            .size(`${streamOpts.width}x${streamOpts.height}`)
-                            .fpsOutput(streamOpts.fps!)
-                            .videoBitrate(`${streamOpts.bitrateKbps}k`)
                             .videoCodec("libsvtav1")
                         break;
                 }
@@ -156,10 +147,10 @@ Cannot play video: ${err.message}
             onCancel(() => command.kill("SIGINT"))
 
             const { video, audio } = await demux(ffmpegOutput);
-            const videoStream = new VideoStream(mediaUdp);
+            const videoStream = new VideoStream(mediaUdp, isRealTime);
             video!.stream.pipe(videoStream)
             if (audio && includeAudio) {
-                const audioStream = new AudioStream(mediaUdp);
+                const audioStream = new AudioStream(mediaUdp, isRealTime);
                 videoStream.syncStream = audioStream;
                 audioStream.syncStream = videoStream;
                 audio.stream.pipe(audioStream)
