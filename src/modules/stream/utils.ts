@@ -6,6 +6,7 @@ import {
   type StreamOptions
 } from "@dank074/discord-video-stream";
 import { streamLivestreamVideo } from "./customStream.js";
+import { streamLivestreamVideo2 } from "./customStream2.js";
 
 export async function getVideoInfo(video: string, preferCopy: boolean) {
   let includeAudio = true;
@@ -23,8 +24,8 @@ export async function getVideoInfo(video: string, preferCopy: boolean) {
     const fps = parseInt(videoStream.r_frame_rate!.split('/')[0]) / parseInt(videoStream.r_frame_rate!.split('/')[1]);
     streamOpts = { ...streamOpts, fps }
   }
-  // @ts-ignore
-  if (videoStream && (["h264", "hevc", "av1"] as const).includes(videoStream.codec_name) && !video.includes("ttvnw.net") && preferCopy) //only supports those profiles
+
+  if (videoStream && preferCopy) //only supports those profiles
   {
     // lets copy the video instead
     console.log('copying codec');
