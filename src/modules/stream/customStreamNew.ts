@@ -167,18 +167,6 @@ export function prepareStream(
         width, height, frameRate, bitrateVideo, bitrateVideoMax, videoCodec, h26xPreset, copyCodec
     } = mergedOptions;
     command.addOption("-map 0:v");
-    command.videoFilter(`scale=${width}:${height}`)
-
-    if (frameRate)
-        command.fpsOutput(frameRate);
-
-    command.addOutputOption([
-        "-b:v", `${bitrateVideo}k`,
-        "-maxrate:v", `${bitrateVideoMax}k`,
-        "-bf", "0",
-        "-pix_fmt", "yuv420p",
-        "-force_key_frames", 'expr:gte(t,n_forced*1)'
-    ]);
 
     if (copyCodec)
     {
@@ -186,6 +174,18 @@ export function prepareStream(
     }
     else
     {
+        command.videoFilter(`scale=${width}:${height}`)
+
+        if (frameRate)
+            command.fpsOutput(frameRate);
+
+        command.addOutputOption([
+            "-b:v", `${bitrateVideo}k`,
+            "-maxrate:v", `${bitrateVideoMax}k`,
+            "-bf", "0",
+            "-pix_fmt", "yuv420p",
+            "-force_key_frames", 'expr:gte(t,n_forced*1)'
+        ]);
         switch (videoCodec) {
             case 'AV1':
                 command
