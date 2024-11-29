@@ -164,7 +164,7 @@ export function prepareStream(
 
     // video setup
     let {
-        width, height, frameRate, bitrateVideo, bitrateVideoMax, videoCodec, h26xPreset
+        width, height, frameRate, bitrateVideo, bitrateVideoMax, videoCodec, h26xPreset, copyCodec
     } = mergedOptions;
     command.addOption("-map 0:v");
     command.videoFilter(`scale=${width}:${height}`)
@@ -180,43 +180,49 @@ export function prepareStream(
         "-force_key_frames", 'expr:gte(t,n_forced*1)'
     ]);
 
-    switch (videoCodec) {
-        case 'AV1':
-            command
-                .videoCodec("libsvtav1")
-            break;
-        case 'VP8':
-            command
-                .videoCodec("libvpx")
-                .outputOption('-deadline', 'realtime');
-            break;
-        case 'VP9':
-            command
-                .videoCodec("libvpx-vp9")
-                .outputOption('-deadline', 'realtime');
-            break;
-        case 'H264':
-            command
-                .videoCodec("h264_nvenc")
-                .outputOptions([
-                    '-forced-idr', '1',
-                    '-noautoscale',
-                    '-pix_fmt yuv420p',
-                    '-preset p3',
-                    '-profile:v baseline',
-                ]);
-            break;
-        case 'H265':
-            command
-                .videoCodec("libx265")
-                .outputOptions([
-                    '-tune zerolatency',
-                    `-preset ${h26xPreset}`,
-                    '-profile:v main',
-                ]);
-            break;
+    if (copyCodec)
+    {
+        command.videoCodec("copy");
     }
-
+    else
+    {
+        switch (videoCodec) {
+            case 'AV1':
+                command
+                    .videoCodec("libsvtav1")
+                break;
+            case 'VP8':
+                command
+                    .videoCodec("libvpx")
+                    .outputOption('-deadline', 'realtime');
+                break;
+            case 'VP9':
+                command
+                    .videoCodec("libvpx-vp9")
+                    .outputOption('-deadline', 'realtime');
+                break;
+            case 'H264':
+                command
+                    .videoCodec("h264_nvenc")
+                    .outputOptions([
+                        '-forced-idr', '1',
+                        '-noautoscale',
+                        '-pix_fmt yuv420p',
+                        '-preset p3',
+                        '-profile:v baseline',
+                    ]);
+                break;
+            case 'H265':
+                command
+                    .videoCodec("libx265")
+                    .outputOptions([
+                        '-tune zerolatency',
+                        `-preset ${h26xPreset}`,
+                        '-profile:v main',
+                    ]);
+                break;
+        }
+    }
     // audio setup
     let { includeAudio, bitrateAudio } = mergedOptions;
     if (includeAudio)
