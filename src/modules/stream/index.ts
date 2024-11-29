@@ -1,11 +1,12 @@
-import PCancelable, { CancelError } from "p-cancelable";
 import { Client, StageChannel } from "discord.js-selfbot-v13";
 import { Command } from "@commander-js/extra-typings";
 import { Streamer, type StreamOptions } from "@dank074/discord-video-stream";
-import { getVideoInfo, playVideo } from "./utils.js";
+import { NewApi } from "@dank074/discord-video-stream";
 
 import { createCommand } from "../index.js";
+import { prepareStream } from "./customStreamNew.js";
 import type { Module } from "../index.js";
+import type Ffmpeg from "fluent-ffmpeg";
 
 let defaultStreamOpts: Partial<StreamOptions> = {
   width: 1920,
@@ -22,7 +23,7 @@ export default {
   name: "stream",
   register(client: Client) {
     const streamer = new Streamer(client);
-    let playback: PCancelable<string>;
+    let playback: Ffmpeg.FfmpegCommand;
     return [
       createCommand(
         new Command("play")
@@ -53,7 +54,7 @@ export default {
             }
             channelId = channelIdNullable;
           }
-          playback?.cancel();
+          playback?.kill("SIGTERM");
 
           try {
             await streamer.joinVoice(guildId, channelId);
@@ -61,18 +62,17 @@ export default {
             if (streamer.client.user!.voice!.channel instanceof StageChannel)
               await streamer.client.user!.voice!.setSuppressed(false);
 
-            const { includeAudio, copyCodec, streamOpts } = await getVideoInfo(url, !!opts.copy);
-            const udpConn = await streamer.createStream({
-              ...defaultStreamOpts,
-              ...streamOpts
+            const { command, output } = prepareStream(url, {
+              copyCodec: !!opts.copy
             });
-            playback = playVideo(url, udpConn, includeAudio, copyCodec, !!opts.realtime);
-            await playback;
+            playback = command;
+
+            await NewApi.playStream(output, streamer, {
+              forceChacha20Encryption: true
+            })
           }
           catch (e)
           {
-            if (e instanceof CancelError)
-              return;
             const error = e as Error;
             message.reply(
               `Oops, something bad happened
@@ -81,25 +81,20 @@ ${error.message}
 \`\`\``
             )
           }
-          finally
-          {
-            streamer.stopStream();
-          }
         }
       ),
 
       createCommand(
         new Command("stop"),
         () => {
-          playback?.cancel();
-          streamer.stopStream();
+          playback?.kill("SIGTERM");
         }
       ),
 
       createCommand(
         new Command("disconnect"),
         () => {
-          playback?.cancel();
+          playback?.kill("SIGTERM");
           streamer.leaveVoice();
         }
       )
