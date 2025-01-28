@@ -20,8 +20,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@dank074/discord-video-stream": "workspace:^",
-    "@dank074/fluent-ffmpeg-multistream-ts": "^1.0.2",
+    "@dank074/discord-video-stream": "https://pkg.pr.new/dank074/Discord-video-stream/@dank074/discord-video-stream@6735f81",
     "commander": "^12.1.0",
     "discord.js-selfbot-v13": "^3.1.4",
     "fluent-ffmpeg": "^2.1.3",
