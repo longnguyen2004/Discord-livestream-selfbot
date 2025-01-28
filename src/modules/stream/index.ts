@@ -18,7 +18,7 @@ export default {
         new Command("play")
           .argument("<url>", "The url to play")
           .option("--copy", "Copy the stream directly instead of re-encoding")
-          .option("--realtime", "Do not sleep between frames. Specify this if the stream is a livestream")
+          .option("--livestream", "Specify if the stream is a livestream")
           .option("--room <id>", "The room ID, specified as <guildId>/<channelId>. If not specified, use the current room of the caller"),
         async (message, args, opts) => {
           const url = args[0];
@@ -61,7 +61,8 @@ export default {
             playback = command;
 
             await NewApi.playStream(output, streamer, {
-              forceChacha20Encryption: true
+              forceChacha20Encryption: true,
+              readrateInitialBurst: opts.livestream ? 10 : undefined
             })
           }
           catch (e)
