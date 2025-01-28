@@ -8,17 +8,6 @@ import { prepareStream } from "./customStreamNew.js";
 import type { Module } from "../index.js";
 import type Ffmpeg from "fluent-ffmpeg";
 
-let defaultStreamOpts: Partial<StreamOptions> = {
-  width: 1920,
-  height: 1080,
-  fps: 60,
-  bitrateKbps: 5000,
-  maxBitrateKbps: 10000,
-  videoCodec: "H264",
-  rtcpSenderReportEnabled: true,
-  forceChacha20Encryption: true
-};
-
 export default {
   name: "stream",
   register(client: Client) {
@@ -55,9 +44,13 @@ export default {
             channelId = channelIdNullable;
           }
           playback?.kill("SIGTERM");
-
           try {
-            await streamer.joinVoice(guildId, channelId);
+            if (
+              !streamer.voiceConnection ||
+              streamer.voiceConnection.guildId !== guildId ||
+              streamer.voiceConnection.channelId !== channelId
+            )
+              await streamer.joinVoice(guildId, channelId);
 
             if (streamer.client.user!.voice!.channel instanceof StageChannel)
               await streamer.client.user!.voice!.setSuppressed(false);
