@@ -56,7 +56,7 @@ export default {
               await streamer.client.user!.voice!.setSuppressed(false);
 
             const { command, output } = prepareStream(url, {
-              copyCodec: !!opts.copy
+              noTranscoding: !!opts.copy
             });
             playback = command;
 
