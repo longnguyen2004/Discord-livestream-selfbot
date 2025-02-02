@@ -4,7 +4,6 @@ import { Streamer, type StreamOptions } from "@dank074/discord-video-stream";
 import { NewApi } from "@dank074/discord-video-stream";
 
 import { createCommand } from "../index.js";
-import { prepareStream } from "./customStreamNew.js";
 import type { Module } from "../index.js";
 import type Ffmpeg from "fluent-ffmpeg";
 
@@ -55,7 +54,7 @@ export default {
             if (streamer.client.user!.voice!.channel instanceof StageChannel)
               await streamer.client.user!.voice!.setSuppressed(false);
 
-            const { command, output } = prepareStream(url, {
+            const { command, output } = NewApi.prepareStream(url, {
               noTranscoding: !!opts.copy
             });
             playback = command;
