@@ -1,7 +1,7 @@
 import { Client, StageChannel } from "discord.js-selfbot-v13";
 import { Command } from "@commander-js/extra-typings";
 import { Streamer } from "@dank074/discord-video-stream";
-import { NewApi } from "@dank074/discord-video-stream";
+import { prepareStream, playStream } from "@dank074/discord-video-stream";
 import { ffmpegIngest } from "./ffmpegIngest.js";
 
 import { createCommand } from "../index.js";
@@ -11,7 +11,9 @@ import type Ffmpeg from "fluent-ffmpeg";
 export default {
   name: "stream",
   register(client: Client) {
-    const streamer = new Streamer(client);
+    const streamer = new Streamer(client, {
+      forceChacha20Encryption: true
+    });
     let playback: Ffmpeg.FfmpegCommand;
     return [
       createCommand(
@@ -55,13 +57,12 @@ export default {
             if (streamer.client.user!.voice!.channel instanceof StageChannel)
               await streamer.client.user!.voice!.setSuppressed(false);
 
-            const { command, output } = NewApi.prepareStream(url, {
+            const { command, output } = prepareStream(url, {
               noTranscoding: !!opts.copy
             });
             playback = command;
 
-            await NewApi.playStream(output, streamer, {
-              forceChacha20Encryption: true,
+            await playStream(output, streamer, {
               readrateInitialBurst: opts.livestream ? 10 : undefined
             })
           }
@@ -123,8 +124,7 @@ ${error.message}
             output.once("data", () => {
               message.reply("Media stream found. Starting playback...");
             })
-            await NewApi.playStream(output, streamer, {
-              forceChacha20Encryption: true,
+            await playStream(output, streamer, {
               readrateInitialBurst: 10
             });
           }

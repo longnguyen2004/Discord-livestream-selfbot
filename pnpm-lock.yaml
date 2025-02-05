@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@dank074/discord-video-stream':
-        specifier: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@147
-        version: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@147(discord.js-selfbot-v13@3.5.1(@discordjs/opus@0.8.0))(sodium-native@4.3.1)
+        specifier: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@e63d1
+        version: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@e63d1(discord.js-selfbot-v13@3.5.1(@discordjs/opus@0.8.0))(sodium-native@4.3.1)
       commander:
         specifier: ^12.1.0
         version: 12.1.0
@@ -65,9 +65,9 @@ packages:
     peerDependencies:
       commander: ~12.1.0
 
-  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@147':
-    resolution: {tarball: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@147}
-    version: 4.1.5
+  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@e63d1':
+    resolution: {tarball: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@e63d1}
+    version: 4.2.0
     engines: {node: '>=21.0.0'}
     peerDependencies:
       discord.js-selfbot-v13: 3.x
@@ -331,11 +331,11 @@ packages:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
 
-  libsodium-wrappers@0.7.13:
-    resolution: {integrity: sha512-kasvDsEi/r1fMzKouIDv7B8I6vNmknXwGiYodErGuESoFTohGSKZplFtVxZqHaoQ217AynyIFgnOVRitpHs0Qw==}
+  libsodium-wrappers@0.7.15:
+    resolution: {integrity: sha512-E4anqJQwcfiC6+Yrl01C1m8p99wEhLmJSs0VQqST66SbQXXBoaJY0pF4BNjRYa/sOQAxx6lXAaAFIlx+15tXJQ==}
 
-  libsodium@0.7.13:
-    resolution: {integrity: sha512-mK8ju0fnrKXXfleL53vtp9xiPq5hKM0zbDQtcxQIsSmxNgSxqCj6R7Hl9PkrNe2j29T4yoDaF7DJLK9/i5iWUw==}
+  libsodium@0.7.15:
+    resolution: {integrity: sha512-sZwRknt/tUpE2AwzHq3jEyUU5uvIZHtSssktXq7owd++3CSgn8RGrv6UZJJBpP7+iBghBqe7Z06/2M31rI2NKw==}
 
   locate-path@5.0.0:
     resolution: {integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==}
@@ -669,7 +669,7 @@ snapshots:
     dependencies:
       commander: 12.1.0
 
-  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@147(discord.js-selfbot-v13@3.5.1(@discordjs/opus@0.8.0))(sodium-native@4.3.1)':
+  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@e63d1(discord.js-selfbot-v13@3.5.1(@discordjs/opus@0.8.0))(sodium-native@4.3.1)':
     dependencies:
       '@libav.js/variant-webcodecs': 6.5.7
       debug-level: 3.2.1
@@ -989,11 +989,11 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  libsodium-wrappers@0.7.13:
+  libsodium-wrappers@0.7.15:
     dependencies:
-      libsodium: 0.7.13
+      libsodium: 0.7.15
 
-  libsodium@0.7.13: {}
+  libsodium@0.7.15: {}
 
   locate-path@5.0.0:
     dependencies:
@@ -1164,7 +1164,7 @@ snapshots:
   sodium-plus@0.9.0(sodium-native@4.3.1):
     dependencies:
       buffer: 5.7.1
-      libsodium-wrappers: 0.7.13
+      libsodium-wrappers: 0.7.15
       poly1305-js: 0.4.4
       sodium-native: 4.3.1
       typedarray-to-buffer: 3.1.5
