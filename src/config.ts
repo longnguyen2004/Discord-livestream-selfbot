@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import type { InferOutput } from "valibot";
-import { readFile } from "fs/promises";
+import { readFile } from "node:fs/promises";
 import { parse as parseJsonc } from "jsonc-parser";
 
 const validator = v.object({
