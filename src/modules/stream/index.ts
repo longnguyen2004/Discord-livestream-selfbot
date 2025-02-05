@@ -8,6 +8,14 @@ import { createCommand } from "../index.js";
 import type { Module } from "../index.js";
 import type Ffmpeg from "fluent-ffmpeg";
 
+function ffmpegErrorHandler(err: Error, stdout: string, stderr: string)
+{
+  if (/SIG(TERM|KILL)/.test(err.message))
+    return;
+  console.log("FFmpeg encountered an error");
+  console.log(err);
+}
+
 export default {
   name: "stream",
   register(client: Client) {
@@ -60,6 +68,7 @@ export default {
             const { command, output } = prepareStream(url, {
               noTranscoding: !!opts.copy
             });
+            command.on("error", ffmpegErrorHandler);
             playback = command;
 
             await playStream(output, streamer, {
@@ -118,6 +127,7 @@ ${error.message}
               await streamer.client.user!.voice!.setSuppressed(false);
 
             const { command, output, host } = ffmpegIngest();
+            command.on("error", ffmpegErrorHandler);
             playback = command;
 
             message.reply(`Please connect your OBS to \`${host}\``);
