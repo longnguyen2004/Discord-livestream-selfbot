@@ -1,7 +1,9 @@
+import parseArgsStringToArgv from "string-argv";
 import { Client } from "discord.js-selfbot-v13";
 import { argv } from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { getConfig } from "./config.js";
+import { CommanderError } from "commander";
 
 process.on('unhandledRejection', (reason: string, p: Promise<any>) => {
     console.error('Unhandled Rejection at:', p, 'reason:', reason);
@@ -22,13 +24,13 @@ const modules = await Promise.all([
 ]);
 
 const programs = new Map(
-    modules.map(m => {
+    modules.flatMap(m => {
         console.log(`Registering module "${m.name}"`);
         return m.register(client).map((program) => [
             program.parser.name(),
             program
         ] as const)
-    }).flat(1)
+    })
 );
 
 client.on("ready", async () => {
@@ -36,7 +38,6 @@ client.on("ready", async () => {
 });
 
 const allowedId = config.allowed_id;
-const splitRegex = /("([^"]|\\")*"|[^"\s]+)(\s+|$)/g;
 client.on("messageCreate", async (message) => {
     if (message.author.bot)
         return;
@@ -48,12 +49,9 @@ client.on("messageCreate", async (message) => {
         return;
 
     if (message.content.startsWith(config.prefix)) {
-        const splitted = [...message.content
-            .slice(config.prefix.length)
-            .trim()
-            .matchAll(splitRegex)
-        ]
-            .map(match => match[1])
+        const splitted = parseArgsStringToArgv(
+            message.content.slice(config.prefix.length).trim()
+        );
         const command = splitted[0];
         const program = programs.get(command);
         if (!program) {
@@ -61,8 +59,25 @@ client.on("messageCreate", async (message) => {
             return;
         }
         const { parser, handler } = program;
-        const result = parser.parse(splitted.slice(1), { from: "user" });
-        handler(message, result.args, result.opts());
+        try {
+            const result = parser.parse(splitted.slice(1), { from: "user" });
+            handler(message, result.args, result.opts());
+        }
+        catch (e: unknown) {
+            if (e instanceof CommanderError)
+            {
+                message.reply(
+`
+\`\`\`
+${e.message}
+\`\`\`
+\`\`\`
+${parser.helpInformation()}
+\`\`\`
+`
+);
+            }
+        }
     }
 })
 

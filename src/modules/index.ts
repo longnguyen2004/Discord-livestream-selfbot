@@ -10,6 +10,13 @@ export function createCommand<
   handler: (message: Message, args: T["args"], opts: ReturnType<T["opts"]>) => unknown
 )
 {
+  parser
+    .helpOption(false)
+    .exitOverride()
+    .configureOutput({
+      writeOut() { },
+      writeErr() { }
+    });
   return {
     parser,
     handler
