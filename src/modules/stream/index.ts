@@ -68,6 +68,7 @@ export default {
             const { command, output } = prepareStream(url, {
               noTranscoding: !!opts.copy
             });
+            // @ts-expect-error uhhh what
             command.on("error", ffmpegErrorHandler);
             playback = command;
 
@@ -127,6 +128,7 @@ ${error.message}
               await streamer.client.user!.voice!.setSuppressed(false);
 
             const { command, output, host } = ffmpegIngest();
+            // @ts-expect-error uhhh what
             command.on("error", ffmpegErrorHandler);
             playback = command;
 
