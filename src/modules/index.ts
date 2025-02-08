@@ -1,13 +1,16 @@
-import type { Message, Client } from "discord.js-selfbot-v13"
+import type { Message } from "discord.js-selfbot-v13"
 import type { Command } from "@commander-js/extra-typings"
+import type { Bot } from "../bot.js";
+
+type DumbArgs = (string | undefined)[];
+type DumbOpts = (Record<string, string | boolean | undefined>)
 
 export function createCommand<
-  Args extends string[],
-  Opts extends Record<string, string | boolean | undefined>,
-  T extends Command<Args, Opts>
+  Args extends DumbArgs = DumbArgs,
+  Opts extends DumbOpts = DumbOpts,
 >(
-  parser: T,
-  handler: (message: Message, args: T["args"], opts: ReturnType<T["opts"]>) => unknown
+  parser: Command<Args, Opts>,
+  handler: (message: Message, args: Args, opts: Opts) => unknown
 )
 {
   parser
@@ -18,8 +21,8 @@ export function createCommand<
       writeErr() { }
     });
   return {
-    parser,
-    handler
+    parser: parser as Command<DumbArgs, DumbOpts>,
+    handler: handler as (message: Message, args: DumbArgs, opts: DumbOpts) => unknown | Promise<unknown>
   }
 }
 
@@ -27,5 +30,5 @@ export type BotCommand = ReturnType<typeof createCommand>;
 
 export type Module = {
   name: string,
-  register: (client: Client) => BotCommand[]
+  register: (bot: Bot) => BotCommand[]
 }
