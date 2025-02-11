@@ -1,14 +1,14 @@
-import { Command } from "@commander-js/extra-typings";
+import { Command, Option } from "@commander-js/extra-typings";
 import { Streamer } from "@dank074/discord-video-stream";
 import { prepareStream, playStream } from "@dank074/discord-video-stream";
-import { ffmpegIngest } from "./ffmpegIngest.js";
+import * as Ingestor from "./ffmpegIngest.js";
 import { createCommand } from "../index.js";
 import { StageChannel } from "discord.js-selfbot-v13";
 
 import type { Module } from "../index.js";
 import type Ffmpeg from "fluent-ffmpeg";
 
-function ffmpegErrorHandler(err: Error, stdout: string, stderr: string)
+function ffmpegErrorHandler(err: Error, stdout: string | null, stderr: string | null)
 {
   if (/SIG(TERM|KILL)/.test(err.message))
     return;
@@ -69,7 +69,6 @@ export default {
             const { command, output } = prepareStream(url, {
               noTranscoding: !!opts.copy
             });
-            // @ts-expect-error uhhh what
             command.on("error", ffmpegErrorHandler);
             playback = command;
 
@@ -93,7 +92,13 @@ ${error.message}
       createCommand(
         new Command("obs")
           .description("Starts an OBS ingest server for livestreaming")
-          .option("--room <id>", "The room ID, specified as <guildId>/<channelId>. If not specified, use the current room of the caller"),
+          .option("--room <id>", "The room ID, specified as <guildId>/<channelId>. If not specified, use the current room of the caller")
+          .option("-p, --port <port>", "Port to use, leave blank for a random port", Number.parseInt)
+          .addOption(
+            new Option("--protocol <prot>", "Stream protocol to use")
+              .choices(["rtmp", "srt", "rist"])
+              .default("srt")
+          ),
         async (message, args, opts) => {
           let guildId: string, channelId: string
           if (opts.room) {
@@ -128,9 +133,15 @@ ${error.message}
             if (streamer.client.user!.voice!.channel instanceof StageChannel)
               await streamer.client.user!.voice!.setSuppressed(false);
 
-            const { command, output, host } = ffmpegIngest();
-            // @ts-expect-error uhhh what
+            const ingestor = {
+              srt: Ingestor.ingestSrt,
+              rtmp: Ingestor.ingestRtmp,
+              rist: Ingestor.ingestRist
+            } as const;
+            const { command, output, host } = ingestor[opts.protocol](opts.port);
+            
             command.on("error", ffmpegErrorHandler);
+            command.on("stderr", (line) => console.log(line));
             playback = command;
 
             message.reply(`Please connect your OBS to \`${host}\``);

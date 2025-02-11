@@ -3,7 +3,7 @@ import type { Command } from "@commander-js/extra-typings"
 import type { Bot } from "../bot.js";
 
 type DumbArgs = (string | undefined)[];
-type DumbOpts = (Record<string, string | boolean | undefined>)
+type DumbOpts = (Record<string, unknown>)
 
 export function createCommand<
   Args extends DumbArgs = DumbArgs,
