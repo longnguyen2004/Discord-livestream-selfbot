@@ -161,6 +161,11 @@ ${error.message}
 					.option(
 						"--format <format>",
 						"The format to use. If not specified, use yt-dlp default",
+					)
+					.option(
+						"--height <height>",
+						"Transcode the video to this height.",
+						Number.parseInt
 					),
 				async (message, args, opts) => {
 					const url = args[0];
@@ -182,6 +187,7 @@ ${error.message}
 					try {
 						const { command, output } = ytdlp.ytdlp(url, opts.format, {
               h26xPreset: "superfast",
+							height: opts.height,
               bitrateVideo: 5000,
               bitrateVideoMax: 7500
             });
