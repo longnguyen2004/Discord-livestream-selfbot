@@ -17,6 +17,7 @@ export async function getFormats(link: string)
 
 export function ytdlp(link: string, format?: string, encoderOptions?: Partial<NewApi.EncoderOptions>)
 {
-    const stream = $`yt-dlp ${format ? "--format " + format : ""} -o - ${link}`.stdout;
+    // This kinda sucks but whatever
+    const stream = $`yt-dlp ${format ? "--format " : ""} ${format ?? ""} -o - ${link}`.stdout;
     return NewApi.prepareStream(stream, encoderOptions);
 }
