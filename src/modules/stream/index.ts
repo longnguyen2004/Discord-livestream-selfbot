@@ -181,8 +181,10 @@ ${error.message}
 
 					try {
 						const { command, output } = ytdlp.ytdlp(url, opts.format, {
-							height: 1080,
-						});
+              h26xPreset: "superfast",
+              bitrateVideo: 5000,
+              bitrateVideoMax: 7500
+            });
 
 						command.on("error", ffmpegErrorHandler);
 						command.on("stderr", (line) => console.log(line));
