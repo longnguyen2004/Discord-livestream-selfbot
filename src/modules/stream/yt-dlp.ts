@@ -22,6 +22,6 @@ export function ytdlp(link: string, format?: string, encoderOptions?: Partial<Ne
         "-o", "-",
         link
     ];
-    const stream = $("yt-dlp", args).readable();
-    return NewApi.prepareStream(stream, encoderOptions);
+    const ytdlpProcess = $({ buffer: { stdout: false }})("yt-dlp", args);
+    return NewApi.prepareStream(ytdlpProcess.stdout, encoderOptions);
 }
