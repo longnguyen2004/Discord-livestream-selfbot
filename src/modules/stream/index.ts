@@ -171,7 +171,7 @@ ${error.message}
             reply += `Formats for URL \`${url}\`\n`;
             for (const format of formats)
             {
-              reply += `- \`${format.format_id}\`: ext ${format.ext}, res ${format.resolution}, fps ${format.fps}`;
+              reply += `- \`${format.format_id}\`: ext ${format.ext}, res ${format.resolution}, fps ${format.fps}\n`;
             }
             message.reply(reply);
             return;
