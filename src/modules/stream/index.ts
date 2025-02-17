@@ -164,6 +164,18 @@ ${error.message}
 					),
 				async (message, args, opts) => {
 					const url = args[0];
+          if (opts.listFormats)
+          {
+            const formats = await ytdlp.getFormats(url);
+            let reply = "";
+            reply += `Formats for URL \`${url}\`\n`;
+            for (const format of formats)
+            {
+              reply += `- \`${format.format_id}\`: ext ${format.ext}, res ${format.resolution}, fps ${format.fps}`;
+            }
+            message.reply(reply);
+            return;
+          }
 					await joinRoom(streamer, message);
 					playback?.kill("SIGTERM");
 
