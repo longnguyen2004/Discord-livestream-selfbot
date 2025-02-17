@@ -10,7 +10,7 @@ export interface YtdlpFormat {
 
 export async function getFormats(link: string)
 {
-    const result = (await $`yt-dlp --print "%(formats)#j" ${link}`).stdout;
+    const result = (await $`yt-dlp --print "%(formats)+j" ${link}`).stdout;
     return JSON.parse(result) as YtdlpFormat[];
 }
 
