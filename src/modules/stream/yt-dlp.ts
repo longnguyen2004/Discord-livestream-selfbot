@@ -19,7 +19,14 @@ export function ytdlp(
   format?: string,
   encoderOptions?: Partial<NewApi.EncoderOptions>,
 ) {
-  const args = [...(format ? ["--format", format] : []), "-o", "-", link];
+  const args = [
+    ...(format ? ["--format", format] : []),
+    "-o",
+    "-",
+    "-R",
+    "infinite",
+    link,
+  ];
   const ytdlpProcess = $({ buffer: { stdout: false } })("yt-dlp", args);
   const { command, output } = NewApi.prepareStream(
     ytdlpProcess.stdout,
