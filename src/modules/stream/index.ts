@@ -54,6 +54,7 @@ async function joinRoom(
 
   if (streamer.client.user!.voice!.channel instanceof StageChannel)
     await streamer.client.user!.voice!.setSuppressed(false);
+  return true;
 }
 
 export default {
@@ -76,7 +77,8 @@ export default {
           ),
         async (message, args, opts) => {
           const url = args[0];
-          await joinRoom(streamer, message, opts.room);
+          if (!await joinRoom(streamer, message, opts.room))
+            return;
           playback?.kill("SIGTERM");
           try {
             const { command, output } = prepareStream(url, {
@@ -118,7 +120,8 @@ ${error.message}
               .default("srt"),
           ),
         async (message, args, opts) => {
-          await joinRoom(streamer, message, opts.room);
+          if (!await joinRoom(streamer, message, opts.room))
+            return;
           playback?.kill("SIGTERM");
           try {
             const ingestor = {
@@ -179,7 +182,8 @@ ${error.message}
             message.reply(reply);
             return;
           }
-          await joinRoom(streamer, message);
+          if (!await joinRoom(streamer, message))
+            return;
           playback?.kill("SIGTERM");
 
           try {
