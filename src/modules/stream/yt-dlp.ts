@@ -23,5 +23,7 @@ export function ytdlp(link: string, format?: string, encoderOptions?: Partial<Ne
         link
     ];
     const ytdlpProcess = $({ buffer: { stdout: false }})("yt-dlp", args);
-    return NewApi.prepareStream(ytdlpProcess.stdout, encoderOptions);
+    const { command, output } = NewApi.prepareStream(ytdlpProcess.stdout, encoderOptions);
+    command.on("end", () => ytdlpProcess.kill("SIGKILL"));
+    return { command, output, ytdlpProcess } 
 }
