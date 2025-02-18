@@ -25,6 +25,10 @@ export function ytdlp(
     "-",
     "-R",
     "infinite",
+    "--downloader",
+    "ffmpeg",
+    "--downloader",
+    "http:native",
     link,
   ];
   const ytdlpProcess = $({ buffer: { stdout: false } })("yt-dlp", args);
