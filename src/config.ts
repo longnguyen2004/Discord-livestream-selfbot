@@ -6,15 +6,14 @@ import { parse as parseJsonc } from "jsonc-parser";
 const validator = v.object({
   token: v.string(),
   prefix: v.string(),
-  allowed_id: v.array(v.string())
+  allowed_id: v.array(v.string()),
 });
 
 export type BotConfig = InferOutput<typeof validator>;
 
-export async function getConfig(path: string)
-{
+export async function getConfig(path: string) {
   return v.parse(
     validator,
-    parseJsonc((await readFile(path)).toString("utf-8"))
+    parseJsonc((await readFile(path)).toString("utf-8")),
   );
 }
