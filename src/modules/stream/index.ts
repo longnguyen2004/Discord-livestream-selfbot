@@ -46,10 +46,8 @@ async function joinRoom(
   return true;
 }
 
-function errorHandler(err: Error, message: Message)
-{
-  if (err.name === "AbortError")
-    return;
+function errorHandler(err: Error, message: Message) {
+  if (err.name === "AbortError") return;
   message.reply(`Oops, something bad happened
 \`\`\`
 ${err.message}
@@ -76,18 +74,26 @@ export default {
           ),
         async (message, args, opts) => {
           const url = args[0];
-          if (!await joinRoom(streamer, message, opts.room))
-            return;
+          if (!(await joinRoom(streamer, message, opts.room))) return;
           abortController?.abort();
           abortController = new AbortController();
           try {
-            const { command, output } = prepareStream(url, {
-              noTranscoding: !!opts.copy,
-            }, abortController.signal);
+            const { command, output } = prepareStream(
+              url,
+              {
+                noTranscoding: !!opts.copy,
+              },
+              abortController.signal,
+            );
 
-            await playStream(output, streamer, {
-              readrateInitialBurst: opts.livestream ? 10 : undefined,
-            }, abortController.signal);
+            await playStream(
+              output,
+              streamer,
+              {
+                readrateInitialBurst: opts.livestream ? 10 : undefined,
+              },
+              abortController.signal,
+            );
           } catch (e) {
             errorHandler(e as Error, message);
           }
@@ -112,8 +118,7 @@ export default {
               .default("srt"),
           ),
         async (message, args, opts) => {
-          if (!await joinRoom(streamer, message, opts.room))
-            return;
+          if (!(await joinRoom(streamer, message, opts.room))) return;
           abortController?.abort();
           abortController = new AbortController();
           try {
@@ -123,7 +128,8 @@ export default {
               rist: Ingestor.ingestRist,
             } as const;
             const { command, output, host } = ingestor[opts.protocol](
-              opts.port, abortController.signal
+              opts.port,
+              abortController.signal,
             );
             abortController?.abort();
             abortController = new AbortController();
@@ -134,9 +140,14 @@ export default {
             output.once("data", () => {
               message.reply("Media stream found. Starting playback...");
             });
-            await playStream(output, streamer, {
-              readrateInitialBurst: 10,
-            }, abortController.signal);
+            await playStream(
+              output,
+              streamer,
+              {
+                readrateInitialBurst: 10,
+              },
+              abortController.signal,
+            );
           } catch (e) {
             errorHandler(e as Error, message);
           }
@@ -169,21 +180,30 @@ export default {
             message.reply(reply);
             return;
           }
-          if (!await joinRoom(streamer, message))
-            return;
+          if (!(await joinRoom(streamer, message))) return;
           abortController?.abort();
           abortController = new AbortController();
 
           try {
-            const { command, output } = ytdlp.ytdlp(url, opts.format, {
-              h26xPreset: "superfast",
-              height: opts.height,
-              bitrateVideo: 5000,
-              bitrateVideoMax: 7500,
-            }, abortController.signal);
+            const { command, output } = ytdlp.ytdlp(
+              url,
+              opts.format,
+              {
+                h26xPreset: "superfast",
+                height: opts.height,
+                bitrateVideo: 5000,
+                bitrateVideoMax: 7500,
+              },
+              abortController.signal,
+            );
 
             command.ffmpeg.on("stderr", (line) => console.log(line));
-            await playStream(output, streamer, undefined, abortController.signal);
+            await playStream(
+              output,
+              streamer,
+              undefined,
+              abortController.signal,
+            );
           } catch (e) {
             errorHandler(e as Error, message);
           }

@@ -18,7 +18,7 @@ export function ytdlp(
   link: string,
   format?: string,
   encoderOptions?: Partial<NewApi.EncoderOptions>,
-  cancelSignal?: AbortSignal
+  cancelSignal?: AbortSignal,
 ) {
   const args = [
     ...(format ? ["--format", format] : []),
@@ -28,12 +28,16 @@ export function ytdlp(
     "infinite",
     link,
   ];
-  const ytdlpProcess = $({ cancelSignal, killSignal: "SIGINT", buffer: { stdout: false } })("yt-dlp", args);
-  ytdlpProcess.catch(() => {})
+  const ytdlpProcess = $({
+    cancelSignal,
+    killSignal: "SIGINT",
+    buffer: { stdout: false },
+  })("yt-dlp", args);
+  ytdlpProcess.catch(() => {});
   const { command, output, promise } = NewApi.prepareStream(
     ytdlpProcess.stdout,
     encoderOptions,
-    cancelSignal
+    cancelSignal,
   );
   return {
     output,
@@ -43,7 +47,7 @@ export function ytdlp(
     },
     promise: {
       ytdlp: ytdlpProcess,
-      ffmpeg: promise
-    }
-  }
+      ffmpeg: promise,
+    },
+  };
 }

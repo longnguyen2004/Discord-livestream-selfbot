@@ -65,12 +65,13 @@ export function ingestRtmp(port?: number, cancelSignal?: AbortSignal) {
   command.run();
   return {
     command: {
-      ffmpeg: command
+      ffmpeg: command,
     },
     promise: {
-      ffmpeg: ffmpegPromise(command, cancelSignal)
+      ffmpeg: ffmpegPromise(command, cancelSignal),
     },
-    output, host
+    output,
+    host,
   };
 }
 
@@ -106,12 +107,13 @@ export function ingestSrt(port?: number, cancelSignal?: AbortSignal) {
   command.run();
   return {
     command: {
-      ffmpeg: command
+      ffmpeg: command,
     },
     promise: {
-      ffmpeg: ffmpegPromise(command, cancelSignal)
+      ffmpeg: ffmpegPromise(command, cancelSignal),
     },
-    output, host
+    output,
+    host,
   };
 }
 
@@ -141,11 +143,12 @@ export function ingestRist(port?: number, cancelSignal?: AbortSignal) {
   command.run();
   return {
     command: {
-      ffmpeg: command
+      ffmpeg: command,
     },
     promise: {
-      ffmpeg: ffmpegPromise(command, cancelSignal)
+      ffmpeg: ffmpegPromise(command, cancelSignal),
     },
-    output, host
+    output,
+    host,
   };
 }
