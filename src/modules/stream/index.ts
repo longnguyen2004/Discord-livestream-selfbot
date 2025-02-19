@@ -7,7 +7,6 @@ import { createCommand } from "../index.js";
 import { StageChannel } from "discord.js-selfbot-v13";
 
 import type { Module } from "../index.js";
-import type Ffmpeg from "fluent-ffmpeg";
 import type { Message } from "discord.js-selfbot-v13";
 
 function ffmpegErrorHandler(
@@ -63,7 +62,7 @@ export default {
     const streamer = new Streamer(bot.client, {
       forceChacha20Encryption: true,
     });
-    let playback: Ffmpeg.FfmpegCommand;
+    let stopPlayback: (() => void) | undefined = undefined;
     return [
       createCommand(
         new Command("play")
@@ -79,13 +78,13 @@ export default {
           const url = args[0];
           if (!await joinRoom(streamer, message, opts.room))
             return;
-          playback?.kill("SIGTERM");
+          stopPlayback?.();
           try {
             const { command, output } = prepareStream(url, {
               noTranscoding: !!opts.copy,
             });
             command.on("error", ffmpegErrorHandler);
-            playback = command;
+            stopPlayback = () => command.kill("SIGTERM");
 
             await playStream(output, streamer, {
               readrateInitialBurst: opts.livestream ? 10 : undefined,
@@ -122,7 +121,7 @@ ${error.message}
         async (message, args, opts) => {
           if (!await joinRoom(streamer, message, opts.room))
             return;
-          playback?.kill("SIGTERM");
+          stopPlayback?.();
           try {
             const ingestor = {
               srt: Ingestor.ingestSrt,
@@ -135,7 +134,7 @@ ${error.message}
 
             command.on("error", ffmpegErrorHandler);
             command.on("stderr", (line) => console.log(line));
-            playback = command;
+            stopPlayback = () => command.kill("SIGTERM");
 
             message.reply(`Please connect your OBS to \`${host}\``);
             output.once("data", () => {
@@ -184,10 +183,10 @@ ${error.message}
           }
           if (!await joinRoom(streamer, message))
             return;
-          playback?.kill("SIGTERM");
+          stopPlayback?.();
 
           try {
-            const { command, output } = ytdlp.ytdlp(url, opts.format, {
+            const { command, output, ytdlpProcess } = ytdlp.ytdlp(url, opts.format, {
               h26xPreset: "superfast",
               height: opts.height,
               bitrateVideo: 5000,
@@ -196,7 +195,7 @@ ${error.message}
 
             command.on("error", ffmpegErrorHandler);
             command.on("stderr", (line) => console.log(line));
-            playback = command;
+            stopPlayback = () => ytdlpProcess.kill("SIGTERM");
 
             await playStream(output, streamer);
           } catch (e) {
@@ -212,11 +211,11 @@ ${error.message}
       ),
 
       createCommand(new Command("stop"), () => {
-        playback?.kill("SIGTERM");
+        stopPlayback?.();
       }),
 
       createCommand(new Command("disconnect"), () => {
-        playback?.kill("SIGTERM");
+        stopPlayback?.();
         streamer.leaveVoice();
       }),
     ];

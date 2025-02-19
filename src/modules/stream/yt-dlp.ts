@@ -33,7 +33,5 @@ export function ytdlp(
     ytdlpProcess.stdout,
     encoderOptions,
   );
-  command.on("error", () => ytdlpProcess.kill("SIGKILL"));
-  command.on("end", () => ytdlpProcess.kill("SIGKILL"));
   return { command, output, ytdlpProcess };
 }
