@@ -1,23 +1,13 @@
 import { Command, Option } from "@commander-js/extra-typings";
 import { Streamer } from "@dank074/discord-video-stream";
 import { prepareStream, playStream } from "@dank074/discord-video-stream";
-import * as Ingestor from "./ffmpegIngest.js";
-import * as ytdlp from "./yt-dlp.js";
+import * as Ingestor from "./input/ffmpegIngest.js";
+import * as ytdlp from "./input/yt-dlp.js";
 import { createCommand } from "../index.js";
 import { StageChannel } from "discord.js-selfbot-v13";
 
 import type { Module } from "../index.js";
 import type { Message } from "discord.js-selfbot-v13";
-
-function ffmpegErrorHandler(
-  err: Error,
-  stdout: string | null,
-  stderr: string | null,
-) {
-  if (/SIG(TERM|KILL)/.test(err.message)) return;
-  console.log("FFmpeg encountered an error");
-  console.log(err);
-}
 
 async function joinRoom(
   streamer: Streamer,
@@ -56,13 +46,23 @@ async function joinRoom(
   return true;
 }
 
+function errorHandler(err: Error, message: Message)
+{
+  if (err.name === "AbortError")
+    return;
+  message.reply(`Oops, something bad happened
+\`\`\`
+${err.message}
+\`\`\``);
+}
+
 export default {
   name: "stream",
   register(bot) {
     const streamer = new Streamer(bot.client, {
       forceChacha20Encryption: true,
     });
-    let stopPlayback: (() => void) | undefined = undefined;
+    let abortController: AbortController;
     return [
       createCommand(
         new Command("play")
@@ -78,25 +78,18 @@ export default {
           const url = args[0];
           if (!await joinRoom(streamer, message, opts.room))
             return;
-          stopPlayback?.();
+          abortController?.abort();
+          abortController = new AbortController();
           try {
             const { command, output } = prepareStream(url, {
               noTranscoding: !!opts.copy,
-            });
-            command.on("error", ffmpegErrorHandler);
-            stopPlayback = () => command.kill("SIGTERM");
+            }, abortController.signal);
 
             await playStream(output, streamer, {
               readrateInitialBurst: opts.livestream ? 10 : undefined,
-            });
+            }, abortController.signal);
           } catch (e) {
-            const error = e as Error;
-            message.reply(
-              `Oops, something bad happened
-\`\`\`
-${error.message}
-\`\`\``,
-            );
+            errorHandler(e as Error, message);
           }
         },
       ),
@@ -121,7 +114,8 @@ ${error.message}
         async (message, args, opts) => {
           if (!await joinRoom(streamer, message, opts.room))
             return;
-          stopPlayback?.();
+          abortController?.abort();
+          abortController = new AbortController();
           try {
             const ingestor = {
               srt: Ingestor.ingestSrt,
@@ -129,12 +123,12 @@ ${error.message}
               rist: Ingestor.ingestRist,
             } as const;
             const { command, output, host } = ingestor[opts.protocol](
-              opts.port,
+              opts.port, abortController.signal
             );
+            abortController?.abort();
+            abortController = new AbortController();
 
-            command.on("error", ffmpegErrorHandler);
-            command.on("stderr", (line) => console.log(line));
-            stopPlayback = () => command.kill("SIGTERM");
+            command.ffmpeg.on("stderr", (line) => console.log(line));
 
             message.reply(`Please connect your OBS to \`${host}\``);
             output.once("data", () => {
@@ -142,15 +136,9 @@ ${error.message}
             });
             await playStream(output, streamer, {
               readrateInitialBurst: 10,
-            });
+            }, abortController.signal);
           } catch (e) {
-            const error = e as Error;
-            message.reply(
-              `Oops, something bad happened
-\`\`\`
-${error.message}
-\`\`\``,
-            );
+            errorHandler(e as Error, message);
           }
         },
       ),
@@ -183,46 +171,31 @@ ${error.message}
           }
           if (!await joinRoom(streamer, message))
             return;
-          stopPlayback?.();
+          abortController?.abort();
+          abortController = new AbortController();
 
           try {
-            const { command, output, ytdlpProcess } = ytdlp.ytdlp(url, opts.format, {
+            const { command, output } = ytdlp.ytdlp(url, opts.format, {
               h26xPreset: "superfast",
               height: opts.height,
               bitrateVideo: 5000,
               bitrateVideoMax: 7500,
-            });
+            }, abortController.signal);
 
-            command.on("error", ffmpegErrorHandler);
-            command.on("stderr", (line) => console.log(line));
-            /**
-             * When kill() is called, the signal is sent to only the process,
-             * not its descendants. With SIGTERM/SIGKILL, yt-dlp is forced to
-             * end immediately, which might leave a stray ffmpeg process running
-             * in the background. Send a SIGINT here, which allows yt-dlp to do
-             * its cleanup, and end the ffmpeg process for us
-             */
-            stopPlayback = () => ytdlpProcess.kill("SIGINT");
-
-            await playStream(output, streamer);
+            command.ffmpeg.on("stderr", (line) => console.log(line));
+            await playStream(output, streamer, undefined, abortController.signal);
           } catch (e) {
-            const error = e as Error;
-            message.reply(
-              `Oops, something bad happened
-\`\`\`
-${error.message}
-\`\`\``,
-            );
+            errorHandler(e as Error, message);
           }
         },
       ),
 
       createCommand(new Command("stop"), () => {
-        stopPlayback?.();
+        abortController?.abort();
       }),
 
       createCommand(new Command("disconnect"), () => {
-        stopPlayback?.();
+        abortController?.abort();
         streamer.leaveVoice();
       }),
     ];

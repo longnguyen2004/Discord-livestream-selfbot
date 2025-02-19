@@ -1,5 +1,6 @@
 import ffmpeg, { type FfmpegCommand } from "fluent-ffmpeg";
 import { PassThrough } from "node:stream";
+import { ffmpegPromise } from "./utils.js";
 
 export function randomInclusive(min: number, max: number) {
   const minCeiled = Math.ceil(min);
@@ -38,7 +39,8 @@ function addLowLatencyFlags(ffmpeg: FfmpegCommand) {
   );
 }
 
-export function ingestRtmp(port?: number) {
+export function ingestRtmp(port?: number, cancelSignal?: AbortSignal) {
+  cancelSignal?.throwIfAborted();
   const _port = port ?? randomInclusive(40000, 50000);
   const host = `rtmp://localhost:${_port}`;
   const output = new PassThrough();
@@ -61,10 +63,18 @@ export function ingestRtmp(port?: number) {
     .audioBitrate("128k");
 
   command.run();
-  return { command, output, host };
+  return {
+    command: {
+      ffmpeg: command
+    },
+    promise: {
+      ffmpeg: ffmpegPromise(command, cancelSignal)
+    },
+    output, host
+  };
 }
 
-export function ingestSrt(port?: number) {
+export function ingestSrt(port?: number, cancelSignal?: AbortSignal) {
   const _port = port ?? randomInclusive(40000, 50000);
   const host = `srt://localhost:${_port}?transtype=live&smoother=live`;
   const output = new PassThrough();
@@ -94,10 +104,18 @@ export function ingestSrt(port?: number) {
     .audioBitrate("128k");
 
   command.run();
-  return { command, output, host };
+  return {
+    command: {
+      ffmpeg: command
+    },
+    promise: {
+      ffmpeg: ffmpegPromise(command, cancelSignal)
+    },
+    output, host
+  };
 }
 
-export function ingestRist(port?: number) {
+export function ingestRist(port?: number, cancelSignal?: AbortSignal) {
   const _port = port ?? randomInclusive(40000, 50000);
   const hostListener = `rist://@localhost:${_port}`;
   const host = `rist://localhost:${_port}`;
@@ -121,5 +139,13 @@ export function ingestRist(port?: number) {
     .audioBitrate("128k");
 
   command.run();
-  return { command, output, host };
+  return {
+    command: {
+      ffmpeg: command
+    },
+    promise: {
+      ffmpeg: ffmpegPromise(command, cancelSignal)
+    },
+    output, host
+  };
 }
