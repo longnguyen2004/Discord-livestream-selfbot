@@ -28,10 +28,12 @@ export function ytdlp(
     link,
   ];
   const ytdlpProcess = $({ buffer: { stdout: false } })("yt-dlp", args);
+  ytdlpProcess.catch(() => {})
   const { command, output } = NewApi.prepareStream(
     ytdlpProcess.stdout,
     encoderOptions,
   );
+  command.on("error", () => ytdlpProcess.kill("SIGKILL"));
   command.on("end", () => ytdlpProcess.kill("SIGKILL"));
   return { command, output, ytdlpProcess };
 }
