@@ -195,7 +195,14 @@ ${error.message}
 
             command.on("error", ffmpegErrorHandler);
             command.on("stderr", (line) => console.log(line));
-            stopPlayback = () => ytdlpProcess.kill("SIGTERM");
+            /**
+             * When kill() is called, the signal is sent to only the process,
+             * not its descendants. With SIGTERM/SIGKILL, yt-dlp is forced to
+             * end immediately, which might leave a stray ffmpeg process running
+             * in the background. Send a SIGINT here, which allows yt-dlp to do
+             * its cleanup, and end the ffmpeg process for us
+             */
+            stopPlayback = () => ytdlpProcess.kill("SIGINT");
 
             await playStream(output, streamer);
           } catch (e) {
