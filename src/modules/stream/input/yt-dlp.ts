@@ -28,7 +28,7 @@ export function ytdlp(
     "infinite",
     link,
   ];
-  const ytdlpProcess = $({ cancelSignal, buffer: { stdout: false } })("yt-dlp", args);
+  const ytdlpProcess = $({ cancelSignal, killSignal: "SIGINT", buffer: { stdout: false } })("yt-dlp", args);
   ytdlpProcess.catch(() => {})
   const { command, output, promise } = NewApi.prepareStream(
     ytdlpProcess.stdout,
