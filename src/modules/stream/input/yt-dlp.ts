@@ -34,6 +34,7 @@ export function ytdlp(
     buffer: { stdout: false },
   })("yt-dlp", args);
   ytdlpProcess.catch(() => {});
+  ytdlpProcess.stdout.on("data", () => {});
   const { command, output, promise } = NewApi.prepareStream(
     ytdlpProcess.stdout,
     encoderOptions,
