@@ -13,7 +13,7 @@ export default {
           .argument("[command]", "Get help for a specific command"),
         (message, args) => {
           if (args[0]) {
-            const command = allCommands.get(args[0]);
+            const command = allCommands.get(args[0])?.[0];
             if (!command) {
               message.reply(`Command ${args[0]} doesn't exist`);
               return;
