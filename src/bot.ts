@@ -42,13 +42,13 @@ export class Bot extends EventEmitter {
         console.log(`Registering module ${module.name}`);
         const commands = module.register(this);
         this._allCommandsByModule.set(module.name, commands);
-        for (const command of commands)
-        {
+        for (const command of commands) {
           const commandName = command.parser.name();
           const existingCommand = this._allCommandsByName.get(commandName);
-          if (existingCommand)
-          {
-            console.log(`Command "${commandName}" already exists in module "${existingCommand[1].name}"`);
+          if (existingCommand) {
+            console.log(
+              `Command "${commandName}" already exists in module "${existingCommand[1].name}"`,
+            );
             continue;
           }
           this._allCommandsByName.set(command.parser.name(), [command, module]);
@@ -113,5 +113,9 @@ export class Bot extends EventEmitter {
 
   public get allCommands() {
     return this._allCommandsByName;
+  }
+
+  public get allowedId() {
+    return this._allowedId;
   }
 }
