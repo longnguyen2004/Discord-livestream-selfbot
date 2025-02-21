@@ -16,7 +16,7 @@ export class Bot extends EventEmitter {
   private _client = new Client();
   private _initialized = false;
   private _allowedId;
-  private _allCommandsByName = new Map<string, BotCommand>();
+  private _allCommandsByName = new Map<string, [BotCommand, Module]>();
   private _allCommandsByModule = new Map<string, BotCommand[]>();
 
   public prefix;
@@ -43,7 +43,16 @@ export class Bot extends EventEmitter {
         const commands = module.register(this);
         this._allCommandsByModule.set(module.name, commands);
         for (const command of commands)
-          this._allCommandsByName.set(command.parser.name(), command);
+        {
+          const commandName = command.parser.name();
+          const existingCommand = this._allCommandsByName.get(commandName);
+          if (existingCommand)
+          {
+            console.log(`Command "${commandName}" already exists in module "${existingCommand[1].name}"`);
+            continue;
+          }
+          this._allCommandsByName.set(command.parser.name(), [command, module]);
+        }
       }
       this._client.on("messageCreate", this._handleMessage.bind(this));
       this.client.on("ready", () => {
@@ -67,7 +76,7 @@ export class Bot extends EventEmitter {
         message.content.slice(this.prefix.length).trim(),
       );
       const command = splitted[0];
-      const program = this._allCommandsByName.get(command);
+      const program = this._allCommandsByName.get(command)?.[0];
       if (!program) {
         message.reply(`Invalid command \`${command}\``);
         return;
