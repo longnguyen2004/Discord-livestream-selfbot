@@ -1,6 +1,9 @@
 import type { Message } from "discord.js-selfbot-v13";
 
-export type ReactionHandler = Map<string, (message: Message) => unknown | Promise<unknown>>;
+export type ReactionHandler = Map<
+  string,
+  (message: Message) => unknown | Promise<unknown>
+>;
 
 export async function attachReactionButtons(
   message: Message,
@@ -21,10 +24,8 @@ export async function attachReactionButtons(
   });
   let running = false;
   collector.on("collect", async (collected) => {
-    if (running)
-      return;
-    if (!collected.emoji.name)
-      return;
+    if (running) return;
+    if (!collected.emoji.name) return;
     running = true;
     await handlers.get(collected.emoji.name)?.(message);
     running = false;
