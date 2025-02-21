@@ -81,7 +81,7 @@ export default {
             let message = "";
             message += "Currently running stream\n";
             for (const path of paths.items) {
-              message += `- \`${path.name}\`: \`${path.source}\`\n`;
+              message += `- \`${path.name}\`: \`${path.source.type}\`\n`;
               message += `  - Tracks: ${path.tracks.join(", ")}\n`;
             }
             message += "\n";
