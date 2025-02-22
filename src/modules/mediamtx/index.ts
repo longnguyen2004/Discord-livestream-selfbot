@@ -79,13 +79,13 @@ export default {
             currentPage: number,
           ) => {
             let message = "";
-            message += "Currently running stream\n";
+            message += "## Currently running stream\n";
             for (const path of paths.items) {
               message += `- \`${path.name}\`: \`${path.source.type}\`\n`;
               message += `  - Tracks: ${path.tracks.join(", ")}\n`;
             }
             message += "\n";
-            message += `Page ${currentPage + 1}/${paths.pageCount}`;
+            message += `*Page ${currentPage + 1}/${paths.pageCount}*`;
             return message;
           };
           let currentPage = 0;

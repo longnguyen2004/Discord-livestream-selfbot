@@ -26,12 +26,10 @@ export default {
             return;
           }
           let reply = "";
-          reply += `Loaded modules: ${[...allCommandsByModule.keys()].map((name) => `\`${name}\``).join(", ")}\n`;
-          reply += "\n";
+          reply += `## Loaded modules: ${[...allCommandsByModule.keys()].map((name) => `\`${name}\``).join(", ")}\n`;
           for (const [name, commands] of allCommandsByModule.entries()) {
-            reply += `Commands for \`${name}\`\n`;
+            reply += `### Commands for \`${name}\`\n`;
             reply += `${commands.map((c) => `\`${c.parser.name()}\``).join(", ")}\n`;
-            reply += "\n";
           }
           message.reply(reply);
         },
