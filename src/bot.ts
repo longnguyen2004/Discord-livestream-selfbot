@@ -72,33 +72,40 @@ export class Bot extends EventEmitter {
     if (!message.content) return;
 
     if (message.content.startsWith(this.prefix)) {
-      const splitted = parseArgsStringToArgv(
-        message.content.slice(this.prefix.length).trim(),
+      await this.executeCommand(
+        message,
+        message.content.slice(this.prefix.length).trim()
       );
-      const command = splitted[0];
-      const program = this._allCommandsByName.get(command)?.[0];
-      if (!program) {
-        message.reply(`Invalid command \`${command}\``);
-        return;
-      }
-      const { parser, handler } = program;
-      try {
-        const result = parser.parse(splitted.slice(1), { from: "user" });
-        await handler(message, result.args, result.opts());
-      } catch (e: unknown) {
-        if (e instanceof CommanderError) {
-          let reply = "";
-          reply += "```\n";
-          reply += e.message + "\n";
-          reply += "```\n";
-          reply += "```\n";
-          reply += parser.helpInformation() + "\n";
-          reply += "```\n";
-          message.reply(reply);
-        }
+    }
+  }
+
+  public async executeCommand(message: Message, input: string)
+  {
+    const splitted = parseArgsStringToArgv(input);
+    const command = splitted[0];
+    const program = this._allCommandsByName.get(command)?.[0];
+    if (!program) {
+      message.reply(`Invalid command \`${command}\``);
+      return;
+    }
+    const { parser, handler } = program;
+    try {
+      const result = parser.parse(splitted.slice(1), { from: "user" });
+      await handler(message, result.args, result.opts());
+    } catch (e: unknown) {
+      if (e instanceof CommanderError) {
+        let reply = "";
+        reply += "```\n";
+        reply += e.message + "\n";
+        reply += "```\n";
+        reply += "```\n";
+        reply += parser.helpInformation() + "\n";
+        reply += "```\n";
+        message.reply(reply);
       }
     }
   }
+
   public get client() {
     return this._client;
   }
