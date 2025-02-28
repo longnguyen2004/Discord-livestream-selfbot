@@ -54,6 +54,22 @@ ${err.message}
 \`\`\``);
 }
 
+function addCommonStreamOptions<
+  Args extends unknown[],
+  Opts extends Record<string, unknown>
+>(command: Command<Args, Opts>)
+{
+  return command
+    .option(
+      "--room <id>",
+      "The room ID, specified as <guildId>/<channelId>. If not specified, use the current room of the caller",
+    )
+    .option(
+      "--preview",
+      "Enable stream preview"
+    );
+}
+
 export default {
   name: "stream",
   register(bot) {
@@ -63,15 +79,13 @@ export default {
     let abortController: AbortController;
     return [
       createCommand(
-        new Command("play")
-          .description("Play a video file or link")
-          .argument("<url>", "The url to play")
-          .option("--copy", "Copy the stream directly instead of re-encoding")
-          .option("--livestream", "Specify if the stream is a livestream")
-          .option(
-            "--room <id>",
-            "The room ID, specified as <guildId>/<channelId>. If not specified, use the current room of the caller",
-          ),
+        addCommonStreamOptions(
+          new Command("play")
+            .description("Play a video file or link")
+            .argument("<url>", "The url to play")
+            .option("--copy", "Copy the stream directly instead of re-encoding")
+            .option("--livestream", "Specify if the stream is a livestream")
+        ),
         async (message, args, opts) => {
           const url = args[0];
           if (!(await joinRoom(streamer, message, opts.room))) return;
@@ -91,6 +105,7 @@ export default {
               streamer,
               {
                 readrateInitialBurst: opts.livestream ? 10 : undefined,
+                streamPreview: opts.preview
               },
               abortController.signal,
             );
@@ -101,22 +116,20 @@ export default {
       ),
 
       createCommand(
-        new Command("obs")
-          .description("Starts an OBS ingest server for livestreaming")
-          .option(
-            "--room <id>",
-            "The room ID, specified as <guildId>/<channelId>. If not specified, use the current room of the caller",
-          )
-          .option(
-            "-p, --port <port>",
-            "Port to use, leave blank for a random port",
-            Number.parseInt,
-          )
-          .addOption(
-            new Option("--protocol <prot>", "Stream protocol to use")
-              .choices(["rtmp", "srt", "rist"])
-              .default("srt"),
-          ),
+        addCommonStreamOptions(
+          new Command("obs")
+            .description("Starts an OBS ingest server for livestreaming")
+            .option(
+              "-p, --port <port>",
+              "Port to use, leave blank for a random port",
+              Number.parseInt,
+            )
+            .addOption(
+              new Option("--protocol <prot>", "Stream protocol to use")
+                .choices(["rtmp", "srt", "rist"])
+                .default("srt"),
+            ),
+        ),
         async (message, args, opts) => {
           if (!(await joinRoom(streamer, message, opts.room))) return;
           abortController?.abort();
@@ -145,6 +158,7 @@ export default {
               streamer,
               {
                 readrateInitialBurst: 10,
+                streamPreview: opts.preview
               },
               abortController.signal,
             );
@@ -155,19 +169,21 @@ export default {
       ),
 
       createCommand(
-        new Command("yt-dlp")
-          .description("Play a video using yt-dlp")
-          .argument("<url>", "The url to play")
-          .option("--list-formats", "List all the formats in this video")
-          .option(
-            "--format <format>",
-            "The format to use. If not specified, use yt-dlp default",
-          )
-          .option(
-            "--height <height>",
-            "Transcode the video to this height.",
-            Number.parseInt,
-          ),
+        addCommonStreamOptions(
+          new Command("yt-dlp")
+            .description("Play a video using yt-dlp")
+            .argument("<url>", "The url to play")
+            .option("--list-formats", "List all the formats in this video")
+            .option(
+              "--format <format>",
+              "The format to use. If not specified, use yt-dlp default",
+            )
+            .option(
+              "--height <height>",
+              "Transcode the video to this height.",
+              Number.parseInt,
+            ),
+        ),
         async (message, args, opts) => {
           const url = args[0];
           if (opts.listFormats) {
@@ -180,7 +196,7 @@ export default {
             message.reply(reply);
             return;
           }
-          if (!(await joinRoom(streamer, message))) return;
+          if (!(await joinRoom(streamer, message, opts.room))) return;
           abortController?.abort();
           abortController = new AbortController();
 
@@ -201,7 +217,9 @@ export default {
             await playStream(
               output,
               streamer,
-              undefined,
+              {
+                streamPreview: opts.preview
+              },
               abortController.signal,
             );
           } catch (e) {
