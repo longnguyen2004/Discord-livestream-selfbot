@@ -1,0 +1,5 @@
+{
+  "token": "[PUT YOUR ACCOUNT TOKEN HERE]",
+  "prefix": "$$",
+  "allowed_id": ["[PUT ALLOWED USER IDS HERE]"]
+}
