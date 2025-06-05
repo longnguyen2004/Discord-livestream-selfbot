@@ -179,7 +179,8 @@ export default {
             .option("--list-formats", "List all the formats in this video")
             .option(
               "--format <format>",
-              "The format to use. If not specified, use yt-dlp default",
+              "The format to use.",
+              "bv*+ba"
             )
             .option(
               "--height <height>",
@@ -204,7 +205,7 @@ export default {
           abortController = new AbortController();
 
           try {
-            const { command, output } = ytdlp.ytdlp(
+            const { command, output, controller } = ytdlp.ytdlp(
               url,
               opts.format,
               {
@@ -215,7 +216,7 @@ export default {
               },
               abortController.signal,
             );
-
+            streamController = controller;
             command.ffmpeg.on("stderr", (line) => console.log(line));
             await playStream(
               output,

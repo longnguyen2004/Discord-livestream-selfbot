@@ -35,7 +35,7 @@ export function ytdlp(
   })("yt-dlp", args);
   ytdlpProcess.catch(() => {});
   ytdlpProcess.stdout.on("data", () => {});
-  const { command, output, promise } = NewApi.prepareStream(
+  const { command, output, promise, controller } = NewApi.prepareStream(
     ytdlpProcess.stdout,
     encoderOptions,
     cancelSignal,
@@ -50,5 +50,6 @@ export function ytdlp(
       ytdlp: ytdlpProcess,
       ffmpeg: promise,
     },
+    controller
   };
 }
