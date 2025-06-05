@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@dank074/discord-video-stream':
-        specifier: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@4e5fd35
-        version: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@4e5fd35(discord.js-selfbot-v13@3.6.0(@discordjs/opus@0.8.0))(sodium-native@4.3.2)
+        specifier: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@a37e9c4
+        version: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@a37e9c4(discord.js-selfbot-v13@3.6.0(@discordjs/opus@0.8.0))(sodium-native@4.3.2)
       commander:
         specifier: ^13.1.0
         version: 13.1.0
@@ -133,9 +133,9 @@ packages:
     peerDependencies:
       commander: ~13.1.0
 
-  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@4e5fd35':
-    resolution: {tarball: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@4e5fd35}
-    version: 5.0.0
+  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@a37e9c4':
+    resolution: {tarball: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@a37e9c4}
+    version: 5.0.1
     engines: {node: '>=21.0.0'}
     peerDependencies:
       discord.js-selfbot-v13: ^3.6.0
@@ -389,6 +389,10 @@ packages:
 
   cliui@6.0.0:
     resolution: {integrity: sha512-t6wbgtoCXvAzst7QgXxJYqPt0usEfbgQdftEPbLL/cvv6HPE5VgvqCuAIDR0NgU52ds6rFwqrgakNLrHEjCbrQ==}
+
+  cmake-ts@0.6.1:
+    resolution: {integrity: sha512-uUn2qGhf20j8W/sQ7+UnvvqO1zNccqgbLgwRJi7S23FsjMWJqxvKK80Vc+tvLNKfpJzwH0rgoQD1l24SMnX0yg==}
+    hasBin: true
 
   color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}
@@ -661,6 +665,10 @@ packages:
 
   node-addon-api@5.1.0:
     resolution: {integrity: sha512-eh0GgfEkpnoWDq+VY8OyvYhFEzBk6jIYbRKdIlyTiAXIVJ8PyBaKb0rp7oDtoddbdoHWhq8wwr+XZ81F1rpNdA==}
+
+  node-addon-api@8.3.1:
+    resolution: {integrity: sha512-lytcDEdxKjGJPTLEfW4mYMigRezMlyJY8W4wxJK8zE533Jlb8L8dRuObJFWg2P+AuOIxoCgKF+2Oq4d4Zd0OUA==}
+    engines: {node: ^18 || ^20 || >= 21}
 
   node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
@@ -1024,6 +1032,10 @@ packages:
     resolution: {integrity: sha512-GQHQqAopRhwU8Kt1DDM8NjibDXHC8eoh1erhGAJPEyveY9qqVeXvVikNKrDz69sHowPMorbPUrH/mx8c50eiBQ==}
     engines: {node: '>=18'}
 
+  zeromq@6.4.2:
+    resolution: {integrity: sha512-FnQlI4lEAewE4JexJ6kqQuBVzRf0Mg1n/qE3uXilfosf+X5lqJPiaYfdL/w4SzgAEVBTyqbMt9NbjwI5H89Yaw==}
+    engines: {node: '>= 12'}
+
 snapshots:
 
   '@biomejs/biome@1.9.4':
@@ -1065,7 +1077,7 @@ snapshots:
     dependencies:
       commander: 13.1.0
 
-  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@4e5fd35(discord.js-selfbot-v13@3.6.0(@discordjs/opus@0.8.0))(sodium-native@4.3.2)':
+  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@a37e9c4(discord.js-selfbot-v13@3.6.0(@discordjs/opus@0.8.0))(sodium-native@4.3.2)':
     dependencies:
       '@lng2004/libav.js-variant-webcodecs-avf-with-decoders': 6.5.7-o3
       debug-level: 3.2.1
@@ -1076,6 +1088,7 @@ snapshots:
       sodium-plus: 0.9.0(sodium-native@4.3.2)
       uid: 2.0.2
       ws: 8.18.1
+      zeromq: 6.4.2
     transitivePeerDependencies:
       - bufferutil
       - sodium-native
@@ -1320,6 +1333,8 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 6.2.0
+
+  cmake-ts@0.6.1: {}
 
   color-convert@2.0.1:
     dependencies:
@@ -1618,6 +1633,8 @@ snapshots:
 
   node-addon-api@5.1.0:
     optional: true
+
+  node-addon-api@8.3.1: {}
 
   node-fetch@2.7.0:
     dependencies:
@@ -1970,3 +1987,8 @@ snapshots:
       yargs-parser: 18.1.3
 
   yoctocolors@2.1.1: {}
+
+  zeromq@6.4.2:
+    dependencies:
+      cmake-ts: 0.6.1
+      node-addon-api: 8.3.1

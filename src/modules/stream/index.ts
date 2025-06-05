@@ -1,6 +1,5 @@
 import { Command, Option } from "@commander-js/extra-typings";
-import { Streamer } from "@dank074/discord-video-stream";
-import { prepareStream, playStream } from "@dank074/discord-video-stream";
+import { prepareStream, playStream, Streamer, type Controller } from "@dank074/discord-video-stream";
 import * as Ingestor from "./input/ffmpegIngest.js";
 import * as ytdlp from "./input/yt-dlp.js";
 import { createCommand } from "../index.js";
@@ -41,8 +40,8 @@ async function joinRoom(
   )
     await streamer.joinVoice(guildId, channelId);
 
-  if (streamer.client.user!.voice!.channel instanceof StageChannel)
-    await streamer.client.user!.voice!.setSuppressed(false);
+  if (streamer.client.user?.voice?.channel instanceof StageChannel)
+    await streamer.client.user.voice.setSuppressed(false);
   return true;
 }
 
@@ -77,6 +76,7 @@ export default {
       forceChacha20Encryption: true,
     });
     let abortController: AbortController;
+    let streamController: Controller | null = null;
     return [
       createCommand(
         addCommonStreamOptions(
@@ -92,13 +92,14 @@ export default {
           abortController?.abort();
           abortController = new AbortController();
           try {
-            const { command, output } = prepareStream(
+            const { command, output, controller } = prepareStream(
               url,
               {
                 noTranscoding: !!opts.copy,
               },
               abortController.signal,
             );
+            streamController = controller;
 
             await playStream(
               output,
@@ -111,6 +112,8 @@ export default {
             );
           } catch (e) {
             errorHandler(e as Error, message);
+          } finally {
+            streamController = null;
           }
         },
       ),
@@ -226,6 +229,34 @@ export default {
             errorHandler(e as Error, message);
           }
         },
+      ),
+
+      createCommand(
+        new Command("volume")
+          .description("Adjust the stream volume, or get the current volume")
+          .argument("[value]", "The new stream volume (must be non-negative)"),
+        async (msg, args) => {
+          if (!streamController)
+          {
+            msg.reply("No stream is currently running");
+            return;
+          }
+          if (!args[0])
+          {
+            msg.reply(`Current volume: ${streamController.volume}`);
+            return;
+          }
+          const volume = Number.parseFloat(args[0]);
+          if (!Number.isFinite(volume))
+          {
+            msg.reply("Invalid number");
+            return;
+          }
+          if (await streamController.setVolume(volume))
+            msg.reply("Set volume successful");
+          else
+            msg.reply("Set volume unsuccessful");
+        }
       ),
 
       createCommand(new Command("stop"), () => {
