@@ -26,6 +26,8 @@ export function ytdlp(
     "-",
     "-R",
     "infinite",
+    "--downloader-args", "ffmpeg_i1:-reconnect 1",
+    "--downloader-args", "ffmpeg_i2:-reconnect 1",
     link,
   ];
   const ytdlpProcess = $({
