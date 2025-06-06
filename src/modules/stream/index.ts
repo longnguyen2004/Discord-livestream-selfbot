@@ -180,7 +180,7 @@ export default {
             .option(
               "--format <format>",
               "The format to use.",
-              "bv*+ba"
+              "bv*+ba/b"
             )
             .option(
               "--height <height>",
