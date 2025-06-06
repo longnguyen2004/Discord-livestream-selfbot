@@ -34,7 +34,7 @@ export function ytdlp(
     cancelSignal,
     killSignal: "SIGINT",
     buffer: { stdout: false },
-  })("yt-dlp", args);
+  })("yt-dlp", args, { stderr: "inherit" });
   ytdlpProcess.catch(() => {});
   ytdlpProcess.stdout.on("data", () => {});
   const { command, output, promise, controller } = NewApi.prepareStream(
