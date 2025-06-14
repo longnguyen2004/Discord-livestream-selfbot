@@ -1,5 +1,23 @@
 {
   "token": "[PUT YOUR ACCOUNT TOKEN HERE]",
   "prefix": "$$",
-  "allowed_id": ["[PUT ALLOWED USER IDS HERE]"]
+  "allowed_id": ["[PUT ALLOWED USER IDS HERE]"],
+  "bitrate": 5000,
+  "bitrate_max": 7500,
+  "encoder": {
+    "name": "software",
+    "x264_preset": "superfast",
+    "x265_preset": "superfast"
+  }
+  /* Possible values for encoder
+   * {
+   *   "name": "software",
+   *   "x264_preset": "superfast", (or "ultrafast", "veryfast", "faster",...)
+   *   "x265_preset": "superfast"
+   * }
+   * {
+   *   "name": "nvenc",
+   *   "preset": "p4" (or "p1", "p2", "p3", "p5", "p6", "p7")
+   * }
+   */
 }
