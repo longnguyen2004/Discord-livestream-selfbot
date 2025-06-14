@@ -151,6 +151,7 @@ export default {
     };
     return [
       createCommand(
+        // @ts-expect-error commander.js extra typings is wrong for variadic arguments
         addCommonStreamOptions(
           new Command("play")
             .description("Play a video file or link")
@@ -165,20 +166,19 @@ export default {
             ),
         ),
         async (message, args, opts) => {
-          const urls = args[0];
           if (!(await joinRoomIfNeeded(streamer, message, opts.room))) return;
-          for (const url of urls)
+          for (const url of args)
           {
             playlist.queue({
-              info: url,
+              info: url!,
               stream: async (abort) => {
                 message.reply({
-                  content: `Now playing \`${args[0]}\``,
+                  content: `Now playing \`${url}\``,
                   flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
                 })
                 try {
                   const { command, output, controller } = prepareStream(
-                    url,
+                    url!,
                     {
                       noTranscoding: !!opts.copy,
                       ...encoderSettings,
