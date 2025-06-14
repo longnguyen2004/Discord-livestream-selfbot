@@ -2,7 +2,7 @@ import type { Message } from "discord.js-selfbot-v13";
 import type { Command } from "@commander-js/extra-typings";
 import type { Bot } from "../bot.js";
 
-type DumbArgs = (string | undefined)[];
+type DumbArgs = (string | string[] | undefined)[];
 type DumbOpts = Record<string, unknown>;
 
 export function createCommand<

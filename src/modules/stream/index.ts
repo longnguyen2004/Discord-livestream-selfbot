@@ -127,8 +127,7 @@ export default {
     });
     const playlist = new Playlist();
     let encoder;
-    switch (bot.config.encoder.name)
-    {
+    switch (bot.config.encoder.name) {
       case "software":
         encoder = Encoders.software({
           x264: {
@@ -155,50 +154,53 @@ export default {
         addCommonStreamOptions(
           new Command("play")
             .description("Play a video file or link")
-            .argument("<url>", "The url to play")
+            .argument("<url...>", "The urls to play")
             .option("--copy", "Copy the stream directly instead of re-encoding")
             .option("--livestream", "Specify if the stream is a livestream")
         ),
         async (message, args, opts) => {
-          const url = args[0];
+          const urls = args[0];
           if (!(await joinRoomIfNeeded(streamer, message, opts.room))) return;
-          playlist.queue({
-            info: args[0],
-            stream: async (abort) => {
-              message.reply({
-                content: `Now playing \`${args[0]}\``,
-                flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
-              })
-              try {
-                const { command, output, controller } = prepareStream(
-                  url,
-                  {
-                    noTranscoding: !!opts.copy,
-                    ...encoderSettings
-                  },
-                  abort.signal,
-                );
+          for (const url of urls)
+          {
+            playlist.queue({
+              info: url,
+              stream: async (abort) => {
+                message.reply({
+                  content: `Now playing \`${args[0]}\``,
+                  flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
+                })
+                try {
+                  const { command, output, controller } = prepareStream(
+                    url,
+                    {
+                      noTranscoding: !!opts.copy,
+                      ...encoderSettings
+                    },
+                    abort.signal,
+                  );
 
-                command.on("stderr", (line) => console.log(line));
+                  command.on("stderr", (line) => console.log(line));
 
-                const promise = playStream(
-                  output,
-                  streamer,
-                  {
-                    readrateInitialBurst: opts.livestream ? 10 : undefined,
-                    streamPreview: opts.preview
-                  },
-                  abort.signal,
-                );
+                  const promise = playStream(
+                    output,
+                    streamer,
+                    {
+                      readrateInitialBurst: opts.livestream ? 10 : undefined,
+                      streamPreview: opts.preview
+                    },
+                    abort.signal,
+                  );
 
-                return { controller, promise }
-              } catch (e) {
-                errorHandler(e as Error, message);
-                throw e;
+                  return { controller, promise }
+                } catch (e) {
+                  errorHandler(e as Error, message);
+                  throw e;
+                }
               }
-            }
-          });
-          message.reply(`Added \`${args[0]}\` to the queue`);
+            });
+            message.reply(`Added \`${url}\` to the queue`);
+          }
         },
       ),
 
@@ -372,7 +374,7 @@ export default {
 
       createCommand(
         new Command("queue").description("View the queue"),
-        async(message) => {
+        async (message) => {
           if (!playlist.items.length)
             return message.reply("There are no items in the queue");
           const { length } = playlist.items;
