@@ -16,8 +16,6 @@ console.log(`Loading config from ${configPath}`);
 const config = await getConfig(configPath);
 
 const bot = new Bot({
-  token: config.token,
-  allowedId: config.allowed_id,
-  prefix: config.prefix,
+  config,
   modulesPath: new URL("./modules", import.meta.url),
 });

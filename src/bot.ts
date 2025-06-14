@@ -4,15 +4,15 @@ import { CommanderError } from "@commander-js/extra-typings";
 import { Client, type Message } from "discord.js-selfbot-v13";
 import { glob } from "glob";
 import type { BotCommand, Module } from "./modules/index.js";
+import type { BotConfig } from "./config.js";
 
 export type BotSettings = {
-  token: string;
-  prefix: string;
-  allowedId: string[];
+  config: BotConfig,
   modulesPath: string | URL;
 };
 
 export class Bot extends EventEmitter {
+  private _config: BotConfig;
   private _client = new Client();
   private _initialized = false;
   private _allowedId;
@@ -21,10 +21,11 @@ export class Bot extends EventEmitter {
 
   public prefix;
 
-  constructor({ token, prefix, allowedId, modulesPath }: BotSettings) {
+  constructor({ config, modulesPath }: BotSettings) {
     super();
-    this._allowedId = new Set(allowedId);
-    this.prefix = prefix;
+    this._config = config;
+    this._allowedId = new Set(config.allowed_id);
+    this.prefix = config.prefix;
 
     (async () => {
       const modulesFile = (
@@ -60,7 +61,7 @@ export class Bot extends EventEmitter {
         this._initialized = true;
         this.emit("ready");
       });
-      await this._client.login(token);
+      await this._client.login(config.token);
     })();
   }
 
@@ -124,5 +125,9 @@ export class Bot extends EventEmitter {
 
   public get allowedId() {
     return this._allowedId;
+  }
+
+  public get config() {
+    return this._config;
   }
 }
