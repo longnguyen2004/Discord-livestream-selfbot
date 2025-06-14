@@ -179,6 +179,8 @@ export default {
                   abort.signal,
                 );
 
+                command.on("stderr", (line) => console.log(line));
+
                 const promise = playStream(
                   output,
                   streamer,
