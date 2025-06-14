@@ -92,7 +92,7 @@ export class Bot extends EventEmitter {
     const { parser, handler } = program;
     try {
       const result = parser.parse(splitted.slice(1), { from: "user" });
-      await handler(message, result.args, result.opts());
+      await handler(message, result.processedArgs, result.opts());
     } catch (e: unknown) {
       if (e instanceof CommanderError) {
         let reply = "";
