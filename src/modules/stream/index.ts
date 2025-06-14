@@ -157,6 +157,12 @@ export default {
             .argument("<url...>", "The urls to play")
             .option("--copy", "Copy the stream directly instead of re-encoding")
             .option("--livestream", "Specify if the stream is a livestream")
+            .option(
+              "--height <height>",
+              "Transcode the video to this height. Specify -1 for auto height",
+              Number.parseInt,
+              bot.config.height
+            ),
         ),
         async (message, args, opts) => {
           const urls = args[0];
@@ -175,7 +181,8 @@ export default {
                     url,
                     {
                       noTranscoding: !!opts.copy,
-                      ...encoderSettings
+                      ...encoderSettings,
+                      height: opts.height === -1 ? undefined : opts.height
                     },
                     abort.signal,
                   );
@@ -288,6 +295,7 @@ export default {
               "--height <height>",
               "Transcode the video to this height.",
               Number.parseInt,
+              bot.config.height
             ),
         ),
         async (message, args, opts) => {
@@ -316,8 +324,8 @@ export default {
                   url,
                   opts.format,
                   {
-                    height: opts.height,
-                    ...encoderSettings
+                    ...encoderSettings,
+                    height: opts.height === -1 ? undefined : opts.height,
                   },
                   abort.signal,
                 );

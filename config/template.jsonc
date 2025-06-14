@@ -4,6 +4,7 @@
   "allowed_id": ["[PUT ALLOWED USER IDS HERE]"],
   "bitrate": 5000,
   "bitrate_max": 7500,
+  "height": 1080,
   "encoder": {
     "name": "software",
     "x264_preset": "superfast",

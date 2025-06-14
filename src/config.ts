@@ -22,6 +22,7 @@ const validator = v.object({
   allowed_id: v.array(v.string()),
   bitrate: v.number(),
   bitrate_max: v.number(),
+  height: v.number(),
   encoder: v.variant("name", [
     v.object({
       name: v.literal("software"),
