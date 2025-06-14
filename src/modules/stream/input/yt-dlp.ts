@@ -17,7 +17,7 @@ export async function getFormats(link: string) {
 export function ytdlp(
   link: string,
   format?: string,
-  encoderOptions?: Partial<NewApi.EncoderOptions>,
+  encoderOptions?: Partial<NewApi.PrepareStreamOptions>,
   cancelSignal?: AbortSignal,
 ) {
   const args = [

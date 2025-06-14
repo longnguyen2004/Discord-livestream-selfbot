@@ -1,5 +1,5 @@
 import { Command, Option } from "@commander-js/extra-typings";
-import { prepareStream, playStream, Streamer, type Controller } from "@dank074/discord-video-stream";
+import { prepareStream, playStream, Streamer, Encoders, type Controller } from "@dank074/discord-video-stream";
 import * as Ingestor from "./input/ffmpegIngest.js";
 import * as ytdlp from "./input/yt-dlp.js";
 import { createCommand } from "../index.js";
@@ -126,6 +126,30 @@ export default {
       forceChacha20Encryption: true,
     });
     const playlist = new Playlist();
+    let encoder;
+    switch (bot.config.encoder.name)
+    {
+      case "software":
+        encoder = Encoders.software({
+          x264: {
+            preset: bot.config.encoder.x264_preset
+          },
+          x265: {
+            preset: bot.config.encoder.x265_preset
+          }
+        })
+        break;
+      case "nvenc":
+        encoder = Encoders.nvenc({
+          preset: bot.config.encoder.preset
+        });
+        break;
+    }
+    const encoderSettings = {
+      encoder,
+      bitrateVideo: bot.config.bitrate,
+      bitrateVideoMax: bot.config.bitrate_max
+    };
     return [
       createCommand(
         addCommonStreamOptions(
@@ -150,6 +174,7 @@ export default {
                   url,
                   {
                     noTranscoding: !!opts.copy,
+                    ...encoderSettings
                   },
                   abort.signal,
                 );
@@ -287,10 +312,8 @@ export default {
                   url,
                   opts.format,
                   {
-                    h26xPreset: "superfast",
                     height: opts.height,
-                    bitrateVideo: 5000,
-                    bitrateVideoMax: 7500,
+                    ...encoderSettings
                   },
                   abort.signal,
                 );
