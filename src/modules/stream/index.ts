@@ -166,6 +166,7 @@ export default {
         ),
         async (message, args, opts) => {
           if (!(await joinRoomIfNeeded(streamer, message, opts.room))) return;
+          let added = 0;
           for (const url of args[0])
           {
             playlist.queue({
@@ -205,8 +206,9 @@ export default {
                 }
               }
             });
-            message.reply(`Added \`${url}\` to the queue`);
+            added++;
           }
+          message.reply(`Added ${added} video${added === 1 ? "" : "s"} to the queue`);
         },
       ),
 
