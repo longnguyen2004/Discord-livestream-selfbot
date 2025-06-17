@@ -3,10 +3,12 @@ import { prepareStream, playStream, Streamer, Encoders, type Controller } from "
 import * as Ingestor from "./input/ffmpegIngest.js";
 import * as ytdlp from "./input/yt-dlp.js";
 import { createCommand } from "../index.js";
+import { LogLevel } from "../../bot.js";
 import { MessageFlags, StageChannel } from "discord.js-selfbot-v13";
 
 import type { Module } from "../index.js";
 import type { Message } from "discord.js-selfbot-v13";
+import type { Bot } from "../../bot.js";
 
 async function joinRoomIfNeeded(
   streamer: Streamer,
@@ -96,9 +98,9 @@ class Playlist {
   }
 }
 
-function errorHandler(err: Error, message: Message) {
+function errorHandler(err: Error, bot: Bot, message: Message) {
   if (err.name === "AbortError") return;
-  message.reply(`Oops, something bad happened
+  bot.log(message, LogLevel.ERROR, `Oops, something bad happened
 \`\`\`
 ${err.message}
 \`\`\``);
@@ -201,7 +203,7 @@ export default {
 
                   return { controller, promise }
                 } catch (e) {
-                  errorHandler(e as Error, message);
+                  errorHandler(e as Error, bot, message);
                   throw e;
                 }
               }
@@ -232,7 +234,7 @@ export default {
           playlist.queue({
             info: "OBS stream",
             stream: async (abort) => {
-              message.reply({
+              bot.log(message, LogLevel.INFO, {
                 content: "Now playing OBS stream",
                 flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
               })
@@ -251,7 +253,7 @@ export default {
 
                 message.reply(`Please connect your OBS to \`${host}\``);
                 output.once("data", () => {
-                  message.reply("Media stream found. Starting playback...");
+                  bot.log(message, LogLevel.DEBUG, "Media stream found. Starting playback...");
                 });
                 const promise = playStream(
                   output,
@@ -272,7 +274,7 @@ export default {
                 }
                 return { controller, promise }
               } catch (e) {
-                errorHandler(e as Error, message);
+                errorHandler(e as Error, bot, message);
                 throw e;
               }
             }
@@ -316,7 +318,7 @@ export default {
           playlist.queue({
             info: args[0],
             stream: async (abort) => {
-              message.reply({
+              bot.log(message, LogLevel.INFO, {
                 content: `Now playing \`${args[0]}\``,
                 flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
               })
@@ -341,7 +343,7 @@ export default {
                 );
                 return { controller, promise }
               } catch (e) {
-                errorHandler(e as Error, message);
+                errorHandler(e as Error, bot, message);
                 throw e
               }
             }

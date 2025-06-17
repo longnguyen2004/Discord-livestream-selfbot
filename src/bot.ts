@@ -11,6 +11,14 @@ export type BotSettings = {
   modulesPath: string | URL;
 };
 
+export enum LogLevel {
+  NONE,
+  ERROR,
+  WARNING,
+  INFO,
+  DEBUG
+}
+
 export class Bot extends EventEmitter {
   private _config: BotConfig;
   private _client = new Client();
@@ -19,6 +27,7 @@ export class Bot extends EventEmitter {
   private _allCommandsByName = new Map<string, [BotCommand, Module]>();
   private _allCommandsByModule = new Map<string, BotCommand[]>();
 
+  public logLevel;
   public prefix;
 
   constructor({ config, modulesPath }: BotSettings) {
@@ -26,6 +35,7 @@ export class Bot extends EventEmitter {
     this._config = config;
     this._allowedId = new Set(config.allowed_id);
     this.prefix = config.prefix;
+    this.logLevel = config.log_level;
 
     (async () => {
       const modulesFile = (
@@ -77,6 +87,35 @@ export class Bot extends EventEmitter {
         message,
         message.content.slice(this.prefix.length).trim()
       );
+    }
+  }
+
+  public async log(request: Message, level: LogLevel, ...args: Parameters<Message["channel"]["send"]>)
+  {
+    if (level === LogLevel.NONE)
+      throw new Error("Can't use NONE as log level for log()");
+    if (this.logLevel < level)
+      return;
+    try {
+      const reply = await request.channel.send(...args);
+      switch (level)
+      {
+        case LogLevel.ERROR:
+          await reply.react("🟥");
+          break;
+        case LogLevel.WARNING:
+          await reply.react("🟨");
+          break;
+        case LogLevel.INFO:
+          await reply.react("🟩");
+          break;
+        case LogLevel.DEBUG:
+          await reply.react("🟦");
+          break;
+      }
+    }
+    catch
+    {
     }
   }
 

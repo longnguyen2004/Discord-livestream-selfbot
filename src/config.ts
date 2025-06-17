@@ -2,6 +2,7 @@ import * as v from "valibot";
 import type { InferOutput } from "valibot";
 import { readFile } from "node:fs/promises";
 import { parse as parseJsonc } from "jsonc-parser";
+import { LogLevel } from "./bot.js";
 
 const x26xPresetValidator = v.union([
   v.literal("ultrafast"),
@@ -33,7 +34,8 @@ const validator = v.object({
       name: v.literal("nvenc"),
       preset: v.picklist(["p1", "p2", "p3", "p4", "p5", "p6", "p7"])
     })
-  ])
+  ]),
+  log_level: v.optional(v.enum(LogLevel), LogLevel.NONE)
 });
 
 export type BotConfig = InferOutput<typeof validator>;
