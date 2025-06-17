@@ -31,15 +31,7 @@ const validator = v.object({
     }),
     v.object({
       name: v.literal("nvenc"),
-      preset: v.union([
-        v.literal("p1"),
-        v.literal("p2"),
-        v.literal("p3"),
-        v.literal("p4"),
-        v.literal("p5"),
-        v.literal("p6"),
-        v.literal("p7")
-      ])
+      preset: v.picklist(["p1", "p2", "p3", "p4", "p5", "p6", "p7"])
     })
   ])
 });
