@@ -174,7 +174,7 @@ export default {
             playlist.queue({
               info: url,
               stream: async (abort) => {
-                message.reply({
+                bot.log(message, LogLevel.INFO, {
                   content: `Now playing \`${url}\``,
                   flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
                 })
