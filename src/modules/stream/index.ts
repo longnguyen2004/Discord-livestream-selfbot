@@ -196,7 +196,10 @@ export default {
                     streamer,
                     {
                       readrateInitialBurst: opts.livestream ? 10 : undefined,
-                      streamPreview: opts.preview
+                      streamPreview: opts.preview,
+                      frameRate(v) {
+                        return Math.min(v.framerate_num / v.framerate_den, 120);
+                      },
                     },
                     abort.signal,
                   );
