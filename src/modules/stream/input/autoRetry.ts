@@ -27,7 +27,7 @@ export function autoRetry(
             let hasOutputThisAttempt = false;
             const { command, output, promise, controller } = prepareStream(stream, options, cancelSignal);
             command.on("stderr", (line) => console.log(line));
-            output.on("data", () => hasOutput = hasOutputThisAttempt = true);
+            output.once("data", () => hasOutput = hasOutputThisAttempt = true);
             output.pipe(out, { end: false });
             currentController = controller;
             await promise.catch(e => { lastError = e; });
