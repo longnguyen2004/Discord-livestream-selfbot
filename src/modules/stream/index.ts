@@ -1,14 +1,17 @@
 import { Command, Option } from "@commander-js/extra-typings";
 import { prepareStream, playStream, Streamer, Encoders, type Controller } from "@dank074/discord-video-stream";
+
+import { autoRetry } from "./input/autoRetry.js";
 import * as Ingestor from "./input/ingest.js";
 import * as ytdlp from "./input/yt-dlp.js";
+
 import { createCommand } from "../index.js";
 import { LogLevel } from "../../bot.js";
-import { MessageFlags, StageChannel } from "discord.js-selfbot-v13";
 
-import type { Module } from "../index.js";
+import { MessageFlags, StageChannel } from "discord.js-selfbot-v13";
 import type { Message } from "discord.js-selfbot-v13";
 import type { Bot } from "../../bot.js";
+import type { Module } from "../index.js";
 
 async function joinRoomIfNeeded(
   streamer: Streamer,
@@ -48,7 +51,7 @@ async function joinRoomIfNeeded(
 }
 
 type StreamItem = {
-  controller: Controller,
+  controller?: Controller,
   promise: Promise<unknown>
 }
 type QueueItem = {
@@ -164,6 +167,12 @@ export default {
               "Transcode the video to this height. Specify -1 for auto height",
               Number.parseInt,
               bot.config.height
+            )
+            .option(
+              "--retry <count>",
+              "Number of times to retry if the connection drops. Set to -1 to retry indefinitely",
+              Number.parseInt,
+              0
             ),
         ),
         async (message, args, opts) => {
@@ -179,20 +188,22 @@ export default {
                   flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
                 })
                 try {
-                  const { command, output, controller } = prepareStream(
+                  const stream = autoRetry(
                     url!,
                     {
                       noTranscoding: !!opts.copy,
                       ...encoderSettings,
                       height: opts.height === -1 ? undefined : opts.height
                     },
+                    {
+                      maxRetries: opts.retry,
+                      retryDelay: 3000
+                    },
                     abort.signal,
                   );
 
-                  command.on("stderr", (line) => console.log(line));
-
                   const promise = playStream(
-                    output,
+                    stream.output,
                     streamer,
                     {
                       readrateInitialBurst: opts.livestream ? 10 : undefined,
@@ -201,7 +212,7 @@ export default {
                     abort.signal,
                   );
 
-                  return { controller, promise }
+                  return { get controller() { return stream.controller; }, promise }
                 } catch (e) {
                   errorHandler(e as Error, bot, message);
                   throw e;
@@ -363,7 +374,10 @@ export default {
           }
           const { controller } = playlist.current;
           if (!args[0]) {
-            msg.reply(`Current volume: ${controller.volume}`);
+            if (!controller)
+              msg.reply("The current stream doesn't support volume adjustment");
+            else
+              msg.reply(`Current volume: ${controller.volume}`);
             return;
           }
           const volume = Number.parseFloat(args[0]);
@@ -372,7 +386,9 @@ export default {
             return;
           }
           try {
-            if (await controller.setVolume(volume))
+            if (!controller)
+              msg.reply("The current stream doesn't support volume adjustment");
+            else if (await controller.setVolume(volume))
               msg.reply("Set volume successful");
             else
               msg.reply("Set volume unsuccessful");
