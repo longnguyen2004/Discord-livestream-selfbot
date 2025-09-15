@@ -1,6 +1,6 @@
 import { Command, Option } from "@commander-js/extra-typings";
 import { prepareStream, playStream, Streamer, Encoders, type Controller } from "@dank074/discord-video-stream";
-import * as Ingestor from "./input/ffmpegIngest.js";
+import * as Ingestor from "./input/ingest.js";
 import * as ytdlp from "./input/yt-dlp.js";
 import { createCommand } from "../index.js";
 import { LogLevel } from "../../bot.js";
