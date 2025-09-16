@@ -121,6 +121,14 @@ export default {
           );
         },
       ),
+      createCommand(
+        new Command("mtx-play")
+          .description("Stream a MediaMTX stream")
+          .argument("<path>", "The stream path, as seen from `mtx-list`"),
+        (message, args) => {
+          bot.executeCommand(message, `play "rtsp://localhost:8554/${args[0]}" --copy --livestream --retry 5`)
+        }
+      )
     ];
   },
 } satisfies Module;
