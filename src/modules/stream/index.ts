@@ -56,7 +56,7 @@ type StreamItem = {
 }
 type QueueItem = {
   info: string,
-  stream: (abort: AbortController) => Promise<StreamItem>
+  stream: (signal: AbortSignal) => StreamItem
 }
 
 class Playlist {
@@ -72,11 +72,10 @@ class Playlist {
       try {
         this._abort?.abort();
         this._abort = new AbortController();
-        this._current = await next.stream(this._abort);
-        await this._current.promise;
+        this._current = next.stream(this._abort.signal);
+        await this._current.promise
       }
-      catch {
-      }
+      catch {}
     }
     this._processing = false;
     this._current = undefined;
@@ -127,9 +126,7 @@ function addCommonStreamOptions<
 export default {
   name: "stream",
   register(bot) {
-    const streamer = new Streamer(bot.client, {
-      forceChacha20Encryption: true,
-    });
+    const streamer = new Streamer(bot.client);
     const playlist = new Playlist();
     let encoder;
     switch (bot.config.encoder.name) {
@@ -182,25 +179,21 @@ export default {
           {
             playlist.queue({
               info: url,
-              stream: async (abort) => {
+              stream: (signal: AbortSignal) => {
                 bot.log(message, LogLevel.INFO, {
                   content: `Now playing \`${url}\``,
                   flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
                 })
                 try {
-                  const stream = autoRetry(
-                    url!,
+                  const stream = prepareStream(
+                    url,
                     {
                       noTranscoding: !!opts.copy,
                       ...encoderSettings,
                       height: opts.height === -1 ? undefined : opts.height
                     },
-                    {
-                      maxRetries: opts.retry,
-                      retryDelay: 3000
-                    },
-                    abort.signal,
-                  );
+                    signal,
+                  )
 
                   const promise = playStream(
                     stream.output,
@@ -209,7 +202,7 @@ export default {
                       readrateInitialBurst: opts.livestream ? 10 : undefined,
                       streamPreview: opts.preview
                     },
-                    abort.signal,
+                    signal,
                   );
 
                   return { get controller() { return stream.controller; }, promise }
@@ -244,7 +237,7 @@ export default {
           if (!(await joinRoomIfNeeded(streamer, message, opts.room))) return;
           playlist.queue({
             info: "OBS stream",
-            stream: async (abort) => {
+            stream: (signal: AbortSignal) => {
               bot.log(message, LogLevel.INFO, {
                 content: "Now playing OBS stream",
                 flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
@@ -257,10 +250,8 @@ export default {
                 } as const;
                 const { command, output, host } = ingestor[opts.protocol](
                   opts.port,
-                  abort.signal,
+                  signal,
                 );
-
-                command.ffmpeg.on("stderr", (line) => console.log(line));
 
                 message.reply(`Please connect your OBS to \`${host}\``);
                 output.once("data", () => {
@@ -273,7 +264,7 @@ export default {
                     readrateInitialBurst: 10,
                     streamPreview: opts.preview
                   },
-                  abort.signal,
+                  signal,
                 );
                 const controller = {
                   get volume() {
@@ -328,7 +319,7 @@ export default {
 
           playlist.queue({
             info: args[0],
-            stream: async (abort) => {
+            stream: (signal: AbortSignal) => {
               bot.log(message, LogLevel.INFO, {
                 content: `Now playing \`${args[0]}\``,
                 flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
@@ -341,16 +332,15 @@ export default {
                     ...encoderSettings,
                     height: opts.height === -1 ? undefined : opts.height,
                   },
-                  abort.signal,
+                  signal,
                 );
-                command.ffmpeg.on("stderr", (line) => console.log(line));
                 const promise = playStream(
                   output,
                   streamer,
                   {
                     streamPreview: opts.preview
                   },
-                  abort.signal,
+                  signal,
                 );
                 return { controller, promise }
               } catch (e) {

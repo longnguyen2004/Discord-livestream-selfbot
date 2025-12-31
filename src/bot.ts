@@ -39,7 +39,7 @@ export class Bot extends EventEmitter {
 
     (async () => {
       const modulesFile = (
-        await glob("*/**/index.js", {
+        await glob("*/**/index.*", {
           cwd: modulesPath,
           dotRelative: true,
         })
@@ -86,7 +86,7 @@ export class Bot extends EventEmitter {
       await this.executeCommand(
         message,
         message.content.slice(this.prefix.length).trim()
-      );
+      ).catch(() => {});
     }
   }
 

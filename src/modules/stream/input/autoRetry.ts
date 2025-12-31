@@ -25,12 +25,18 @@ export function autoRetry(
         {
             cancelSignal?.throwIfAborted();
             let hasOutputThisAttempt = false;
-            const { command, output, promise, controller } = prepareStream(stream, options, cancelSignal);
-            command.on("stderr", (line) => console.log(line));
+            const { output, promise, controller } = prepareStream(stream, options, cancelSignal);
             output.once("data", () => hasOutput = hasOutputThisAttempt = true);
             output.pipe(out, { end: false });
             currentController = controller;
-            await promise.catch(e => { lastError = e; });
+            try
+            {
+                await promise;
+            }
+            catch (e)
+            {
+                lastError = e as Error;
+            }
             if (cancelSignal?.aborted)
                 break;
             if (hasOutputThisAttempt)
@@ -39,10 +45,10 @@ export function autoRetry(
             retryCount++;
         }
         out.end();
-        cancelSignal?.throwIfAborted();
         if (hasOutput)
             return;
         throw new Error(`Failed to get any output after ${retryOptions.maxRetries} retries`, { cause: lastError });
     })();
+    promise.catch(() => {});
     return { output: out, promise, get controller() { return currentController; } };
 }
