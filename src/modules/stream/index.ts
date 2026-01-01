@@ -145,6 +145,11 @@ export default {
           preset: bot.config.encoder.preset
         });
         break;
+      case "vaapi":
+        encoder = Encoders.vaapi({
+          device: bot.config.encoder.device
+        });
+        break;
     }
     const encoderSettings = {
       encoder,
