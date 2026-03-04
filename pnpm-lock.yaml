@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@dank074/discord-video-stream':
-        specifier: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@7f3b41c
-        version: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@7f3b41c(discord.js-selfbot-v13@3.7.1(@discordjs/opus@0.8.0))
+        specifier: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@5d87cfc
+        version: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@5d87cfc(discord.js-selfbot-v13@3.7.1(@discordjs/opus@0.8.0))
       commander:
         specifier: ^14.0.0
         version: 14.0.0
@@ -140,8 +140,8 @@ packages:
     peerDependencies:
       commander: ~14.0.0
 
-  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@7f3b41c':
-    resolution: {tarball: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@7f3b41c}
+  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@5d87cfc':
+    resolution: {tarball: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@5d87cfc}
     version: 5.0.2
     engines: {node: '>=22.4.0'}
     peerDependencies:
@@ -574,50 +574,50 @@ packages:
   '@sec-ant/readable-stream@0.4.1':
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
 
-  '@seydx/node-av-darwin-arm64@5.2.1':
-    resolution: {integrity: sha512-DT50vj+/nFs88sk3knUtAgdAt4Q6Y/3VZqohnJ95iWljCcx6NaPf3qApI1maEnsapevHHEJ82KFjVayxiFz+PQ==}
+  '@seydx/node-av-darwin-arm64@5.2.2':
+    resolution: {integrity: sha512-uj8hKggmfckYqRldfRWLT/0wRMhxc31+GMKPeYlL+PeAAfW2UigR0iL06CS/c0qIQRgFC9yMHv5Uc3OrIqJfZw==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [arm64]
     os: [darwin]
 
-  '@seydx/node-av-darwin-x64@5.2.1':
-    resolution: {integrity: sha512-XM9PPs+DOuXGoIEGEAQIIBXxlMxPD84zeYinMSqby/JQnE6Rjf7CJH8yK+jddn/Fj5rTXg/52LFmx72Imk39LQ==}
+  '@seydx/node-av-darwin-x64@5.2.2':
+    resolution: {integrity: sha512-HMq6BSoplzvH/0IygOQNVSYeWR0YH3SczHp53xgzxtzGtsdQ+2oWFuMr6jwlGGIIE0MrfUIDm+yuzZO2Z1YqpA==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [darwin]
 
-  '@seydx/node-av-linux-arm64@5.2.1':
-    resolution: {integrity: sha512-8s8RcuH35H7SksWu4rfBMDtciopDrJGmLLtIyCG9S/NBFBlKavzDjdjGoeJXR5mVL5dkFpcVOXm5axLNXIXXXg==}
+  '@seydx/node-av-linux-arm64@5.2.2':
+    resolution: {integrity: sha512-AltBFfrGK29GvpvVkm3WgKy+RyrGVFZyISLm11mf+KUk/EhpNJauSPAPaPvVaTlISHAuKXW6AncZusjYUEGJ8A==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [arm64]
     os: [linux]
 
-  '@seydx/node-av-linux-x64@5.2.1':
-    resolution: {integrity: sha512-+j5z2PIRENn3hrcXL02AB0dZ/gWtF7ZtSkiw6PHKlsSDPShsOSTpj8QTg5C8NLN9JLXeYabVEpbdgviE0HaUiQ==}
+  '@seydx/node-av-linux-x64@5.2.2':
+    resolution: {integrity: sha512-8H5nas3leiFcFT4yNMhuFlIGaYc5+jUFl3I3hFEww/wnLLd+WG3v/uX8lHot8am8P3eZqwX9PHXoVauxfji5lQ==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [linux]
 
-  '@seydx/node-av-win32-arm64-mingw@5.2.1':
-    resolution: {integrity: sha512-aR5OwKyFTxQ5N1LDePKK3eUGbuwhT4b74bUURBlUu8c/pej5y1/Di90rgU54cdWjUFho6b8h9e7pBcz2XeMGeQ==}
+  '@seydx/node-av-win32-arm64-mingw@5.2.2':
+    resolution: {integrity: sha512-BSQvoyyJKKF2faw0w9YADs9IMYOYXiIEGz/slKfqkYFeAr1AhoPCQmVkIu8U1Knmxnm1XN2xq8ovIYRr7aiUvg==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [arm64]
     os: [win32]
 
-  '@seydx/node-av-win32-arm64-msvc@5.2.1':
-    resolution: {integrity: sha512-kNo0JZGsr2OlP7pz1eBqVlvLch8G7o/tTO20GfpnkSsA88Kwr3v8lxzv6wz8B51KbjhxvLeNNSKZ4OuVSde0fQ==}
+  '@seydx/node-av-win32-arm64-msvc@5.2.2':
+    resolution: {integrity: sha512-1dvoWam1m6u40ffVGGHjy6Giqh9GsGpooRlY5JLZQWftRRO2frDVIU+qaR2xqdE4xMZ2xoLzcVG1uZRtXvw7sQ==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [arm64]
     os: [win32]
 
-  '@seydx/node-av-win32-x64-mingw@5.2.1':
-    resolution: {integrity: sha512-2gsAqiEt/93aSe8aeVKWe+dOqZbi/zXdC/on3nrlFxvE9qKWPxcwzXPBNAazgTq4mKyN/Wh1bZb23eKrW7ZQZA==}
+  '@seydx/node-av-win32-x64-mingw@5.2.2':
+    resolution: {integrity: sha512-mh/n3C/Vm44pDZ0Qn8enKM9Dp32d67tZ1h3s6yL8lbYu6bDyuBET68h+x+Lq+X+PifrNxKczs2gnI3cuKk93Dg==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [win32]
 
-  '@seydx/node-av-win32-x64-msvc@5.2.1':
-    resolution: {integrity: sha512-QoVB1+ob82BWsHearVjCHSBqVNlgdfdtmRLZUhh21060ws7izyY0s/+UDr9N/iTL+Y6xpsJVFwJYA0qTBRDZOg==}
+  '@seydx/node-av-win32-x64-msvc@5.2.2':
+    resolution: {integrity: sha512-abfpaUNj0RK6/tWL2SoXnnhWxvP7HGfeNGZgmJYmVZwCIYQKs6kNcQVF+xPxJedJHYDJuJAI3rOj/2mBK7pPWA==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [win32]
@@ -976,6 +976,10 @@ packages:
     resolution: {integrity: sha512-jpWzZ1ZhwUmeWRhS7Qv3mhpOhLfwI+uAX4e5fOcXqwMR7EcJ0pj2kV1CVzHVMX/LphnKWD3LObjZCoJ71lKpHw==}
     engines: {node: ^18.19.0 || >=20.5.0}
 
+  execa@9.6.1:
+    resolution: {integrity: sha512-9Be3ZoN4LmYR90tUoVu2te2BsbzHfhJyfEiAVfz7N5/zv+jduIfLrV2xdQXOHbaD6KgpGdO9PRPM1Y4Q9QkPkA==}
+    engines: {node: ^18.19.0 || >=20.5.0}
+
   expand-template@2.0.3:
     resolution: {integrity: sha512-XYfuKMvj4O35f/pOXLObndIRvyQ+/+6AhODh+OKWj9S9498pHHn/IMszH+gt0fBCRWMNfk1ZSp5x3AifmnI2vg==}
     engines: {node: '>=6'}
@@ -1003,6 +1007,9 @@ packages:
 
   flatstr@1.0.12:
     resolution: {integrity: sha512-4zPxDyhCyiN2wIAtSLI6gc82/EjqZc1onI4Mz/l0pWrAlsSfYH/2ZIcU+e3oA2wDwbzIWNKwa23F8rh6+DRWkw==}
+
+  fluent-ffmpeg-simplified@0.1.0:
+    resolution: {integrity: sha512-u3McLUh6H6/hhXYxfZcSGwCJAAlN8wsCCPZjVpaK9HIIvmjOB3G584H3PAWZb/ZQTHVKUrzhjNEYMXZXZjOR+g==}
 
   fluent-ffmpeg@2.1.3:
     resolution: {integrity: sha512-Be3narBNt2s6bsaqP6Jzq91heDgOEaDCJAXcE3qcma/EJBSy5FB4cvO31XBInuAuKBx8Kptf8dkhjK0IOru39Q==}
@@ -1236,8 +1243,8 @@ packages:
     resolution: {integrity: sha512-/bRZty2mXUIFY/xU5HLvveNHlswNJej+RnxBjOMkidWfwZzgTbPG1E3K5TOxRLOR+5hX7bSofy8yf1hZevMS8A==}
     engines: {node: ^18 || ^20 || >= 21}
 
-  node-av@5.2.1:
-    resolution: {integrity: sha512-Ey21lWED/1FmTdOA3hS+sE0a6POhDK3sf1G0gFzYRwRn1ce7+IJrPJiQSwuXk2XMZk8+dJJ8nUyJENhsWSigNQ==}
+  node-av@5.2.2:
+    resolution: {integrity: sha512-uon3CnM54pW2yiF0q8t1AKljNxXkUeafobXGyNIpOdGtRz/naqBz/uqX6j+d3IaTPyCHkJvq0SZPtA68XMlNRw==}
 
   node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
@@ -1332,6 +1339,7 @@ packages:
   prebuild-install@7.1.3:
     resolution: {integrity: sha512-8Mf2cbV7x1cXPUILADGI3wuhfqWvtiLA1iclTDbFRZkgRQS0NqsPZphna9V+HyTEadheuPmjaJMsbzKQFOzLug==}
     engines: {node: '>=10'}
+    deprecated: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
     hasBin: true
 
   pretty-ms@9.2.0:
@@ -1745,14 +1753,14 @@ snapshots:
     dependencies:
       commander: 14.0.0
 
-  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@7f3b41c(discord.js-selfbot-v13@3.7.1(@discordjs/opus@0.8.0))':
+  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@5d87cfc(discord.js-selfbot-v13@3.7.1(@discordjs/opus@0.8.0))':
     dependencies:
       '@lng2004/node-datachannel': 0.32.0-20260202
       '@snazzah/davey': 0.1.9
       debug-level: 4.1.1
       discord.js-selfbot-v13: 3.7.1(@discordjs/opus@0.8.0)
-      fluent-ffmpeg: 2.1.3
-      node-av: 5.2.1
+      fluent-ffmpeg-simplified: 0.1.0
+      node-av: 5.2.2
       p-debounce: 5.1.0
       sharp: 0.34.5
       zeromq: 6.5.0
@@ -2157,42 +2165,42 @@ snapshots:
 
   '@sec-ant/readable-stream@0.4.1': {}
 
-  '@seydx/node-av-darwin-arm64@5.2.1':
+  '@seydx/node-av-darwin-arm64@5.2.2':
     dependencies:
       unzipper: 0.12.3
     optional: true
 
-  '@seydx/node-av-darwin-x64@5.2.1':
+  '@seydx/node-av-darwin-x64@5.2.2':
     dependencies:
       unzipper: 0.12.3
     optional: true
 
-  '@seydx/node-av-linux-arm64@5.2.1':
+  '@seydx/node-av-linux-arm64@5.2.2':
     dependencies:
       unzipper: 0.12.3
     optional: true
 
-  '@seydx/node-av-linux-x64@5.2.1':
+  '@seydx/node-av-linux-x64@5.2.2':
     dependencies:
       unzipper: 0.12.3
     optional: true
 
-  '@seydx/node-av-win32-arm64-mingw@5.2.1':
+  '@seydx/node-av-win32-arm64-mingw@5.2.2':
     dependencies:
       unzipper: 0.12.3
     optional: true
 
-  '@seydx/node-av-win32-arm64-msvc@5.2.1':
+  '@seydx/node-av-win32-arm64-msvc@5.2.2':
     dependencies:
       unzipper: 0.12.3
     optional: true
 
-  '@seydx/node-av-win32-x64-mingw@5.2.1':
+  '@seydx/node-av-win32-x64-mingw@5.2.2':
     dependencies:
       unzipper: 0.12.3
     optional: true
 
-  '@seydx/node-av-win32-x64-msvc@5.2.1':
+  '@seydx/node-av-win32-x64-msvc@5.2.2':
     dependencies:
       unzipper: 0.12.3
     optional: true
@@ -2564,6 +2572,21 @@ snapshots:
       strip-final-newline: 4.0.0
       yoctocolors: 2.1.1
 
+  execa@9.6.1:
+    dependencies:
+      '@sindresorhus/merge-streams': 4.0.0
+      cross-spawn: 7.0.6
+      figures: 6.1.0
+      get-stream: 9.0.1
+      human-signals: 8.0.1
+      is-plain-obj: 4.1.0
+      is-stream: 4.0.1
+      npm-run-path: 6.0.0
+      pretty-ms: 9.2.0
+      signal-exit: 4.1.0
+      strip-final-newline: 4.0.0
+      yoctocolors: 2.1.1
+
   expand-template@2.0.3: {}
 
   fast-deep-equal@3.1.3: {}
@@ -2591,6 +2614,11 @@ snapshots:
       path-exists: 4.0.0
 
   flatstr@1.0.12: {}
+
+  fluent-ffmpeg-simplified@0.1.0:
+    dependencies:
+      execa: 9.6.1
+      string-argv: 0.3.2
 
   fluent-ffmpeg@2.1.3:
     dependencies:
@@ -2810,19 +2838,19 @@ snapshots:
 
   node-addon-api@8.5.0: {}
 
-  node-av@5.2.1:
+  node-av@5.2.2:
     dependencies:
       unzipper: 0.12.3
       werift: 0.22.4
     optionalDependencies:
-      '@seydx/node-av-darwin-arm64': 5.2.1
-      '@seydx/node-av-darwin-x64': 5.2.1
-      '@seydx/node-av-linux-arm64': 5.2.1
-      '@seydx/node-av-linux-x64': 5.2.1
-      '@seydx/node-av-win32-arm64-mingw': 5.2.1
-      '@seydx/node-av-win32-arm64-msvc': 5.2.1
-      '@seydx/node-av-win32-x64-mingw': 5.2.1
-      '@seydx/node-av-win32-x64-msvc': 5.2.1
+      '@seydx/node-av-darwin-arm64': 5.2.2
+      '@seydx/node-av-darwin-x64': 5.2.2
+      '@seydx/node-av-linux-arm64': 5.2.2
+      '@seydx/node-av-linux-x64': 5.2.2
+      '@seydx/node-av-win32-arm64-mingw': 5.2.2
+      '@seydx/node-av-win32-arm64-msvc': 5.2.2
+      '@seydx/node-av-win32-x64-mingw': 5.2.2
+      '@seydx/node-av-win32-x64-msvc': 5.2.2
     transitivePeerDependencies:
       - supports-color
 
