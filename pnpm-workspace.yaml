@@ -1,0 +1,12 @@
+ignoredBuiltDependencies:
+  - '@biomejs/biome'
+  - '@discordjs/opus'
+  - '@seydx/node-av-win32-x64-mingw'
+  - esbuild
+  - sharp
+  - zeromq
+
+onlyBuiltDependencies:
+  - '@lng2004/node-datachannel'
+  - '@seydx/node-av-win32-x64-msvc'
+  - node-av
