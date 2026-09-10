@@ -12,7 +12,20 @@ import { MessageFlags, StageChannel } from "@lng2004/discord.js-selfbot-v13";
 import type { Module } from "../index.js";
 import type { Message } from "@lng2004/discord.js-selfbot-v13";
 import type { Bot } from "../../bot.js";
-import type { Module } from "../index.js";
+
+function parseRoom(room: string): { guildId: string; channelId: string } | null {
+  const linkMatch = room.match(/https:\/\/discord\.com\/channels\/(\d+)\/(\d+)/);
+  if (linkMatch) {
+    return { guildId: linkMatch[1], channelId: linkMatch[2] };
+  }
+
+  const parts = room.split("/");
+  if (parts.length === 2 && parts[0] && parts[1]) {
+    return { guildId: parts[0], channelId: parts[1] };
+  }
+
+  return null;
+}
 
 async function joinRoomIfNeeded(
   streamer: Streamer,
@@ -21,15 +34,12 @@ async function joinRoomIfNeeded(
 ) {
   let guildId: string, channelId: string;
   if (optionalRoom) {
-    [guildId, channelId] = optionalRoom.split("/");
-    if (!guildId) {
-      message.reply("Guild ID is empty");
+    const parsed = parseRoom(optionalRoom);
+    if (!parsed) {
+      message.reply("Invalid room format. Use <guildId>/<channelId> or a Discord channel link.");
       return false;
     }
-    if (!channelId) {
-      message.reply("Channel ID is empty");
-      return false;
-    }
+    ({ guildId, channelId } = parsed);
   } else {
     guildId = message.guildId!;
     const channelIdNullable = message.author.voice?.channel?.id;
@@ -116,7 +126,7 @@ function addCommonStreamOptions<
   return command
     .option(
       "--room <id>",
-      "The room ID, specified as <guildId>/<channelId>. If not specified, use the current room of the caller",
+      "The room, specified as <guildId>/<channelId> or a Discord channel link (https://discord.com/channels/<guildId>/<channelId>). If not specified, use the current room of the caller",
     )
     .option(
       "--preview",
