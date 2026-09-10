@@ -1,6 +1,5 @@
-import ffmpeg, { type FfmpegCommand } from "fluent-ffmpeg";
+import { FFmpegCommand } from "fluent-ffmpeg-simplified";
 import { PassThrough } from "node:stream";
-import { ffmpegPromise } from "./utils.js";
 
 export function randomInclusive(min: number, max: number) {
   const minCeiled = Math.ceil(min);
@@ -22,8 +21,8 @@ export function randomInclusive(min: number, max: number) {
  * - Keyframe duration: 1s
  */
 
-function addLowLatencyFlags(ffmpeg: FfmpegCommand) {
-  ffmpeg.addOption(
+function addLowLatencyFlags(ffmpeg: FFmpegCommand) {
+  ffmpeg.inputOptions(
     "-fflags",
     "nobuffer",
     "-fflags",
@@ -39,114 +38,76 @@ function addLowLatencyFlags(ffmpeg: FfmpegCommand) {
   );
 }
 
-export function ingestRtmp(port?: number, cancelSignal?: AbortSignal) {
+export type IngestProtocol = "rtmp" | "srt" | "rist";
+
+export function ingest(
+  protocol: IngestProtocol,
+  port?: number,
+  cancelSignal?: AbortSignal,
+) {
   cancelSignal?.throwIfAborted();
   const _port = port ?? randomInclusive(40000, 50000);
-  const host = `rtmp://localhost:${_port}`;
   const output = new PassThrough();
-  const command = ffmpeg(host);
-  command.addOption("-stats");
+  const command = new FFmpegCommand();
+
+  let host: string;
+  let inputUrl: string;
+  let inputFormat: string;
+  let inputOptions: string[];
+
+  switch (protocol) {
+    case "rtmp":
+      host = `rtmp://localhost:${_port}`;
+      inputUrl = host;
+      inputFormat = "flv";
+      inputOptions = ["-listen", "1", "-tcp_nodelay", "1", "-rtmp_buffer", "20"];
+      break;
+    case "srt":
+      host = `srt://localhost:${_port}?transtype=live&smoother=live`;
+      inputUrl = host;
+      inputFormat = "mpegts";
+      inputOptions = [
+        "-mode",
+        "listener",
+        "-latency",
+        "5000", // 5000 microseconds
+        "-scan_all_pmts",
+        "0",
+      ];
+      break;
+    case "rist":
+      host = `rist://localhost:${_port}`;
+      inputUrl = `rist://@localhost:${_port}`;
+      inputFormat = "mpegts";
+      inputOptions = ["-buffer_size", "20", "-scan_all_pmts", "0"];
+      break;
+  }
+
+  command.input(inputUrl);
+  command.inputOptions("-stats");
   addLowLatencyFlags(command);
   command
-    .inputFormat("flv")
-    .addInputOption("-listen", "1", "-tcp_nodelay", "1", "-rtmp_buffer", "20")
+    .inputFormat(inputFormat)
+    .inputOptions(...inputOptions)
     .output(output)
-    .outputFormat("nut");
+    .format("nut");
 
-  command.addOutputOption("-map 0:v");
+  command.outputOptions("-map 0:v");
   command.videoCodec("copy");
   command
-    .addOutputOption("-map 0:a?")
+    .outputOptions("-map 0:a?")
     .audioChannels(2)
     .audioFrequency(48000)
     .audioCodec("libopus")
     .audioBitrate("128k");
-  cancelSignal?.addEventListener("abort", () => command.kill("SIGTERM"), { once: true });
-  command.run();
+
+  const promise = command.run(cancelSignal);
   return {
     command: {
       ffmpeg: command,
     },
     promise: {
-      ffmpeg: ffmpegPromise(command, cancelSignal),
-    },
-    output,
-    host,
-  };
-}
-
-export function ingestSrt(port?: number, cancelSignal?: AbortSignal) {
-  const _port = port ?? randomInclusive(40000, 50000);
-  const host = `srt://localhost:${_port}?transtype=live&smoother=live`;
-  const output = new PassThrough();
-  const command = ffmpeg(host);
-  command.addOption("-stats");
-  addLowLatencyFlags(command);
-  command
-    .inputFormat("mpegts")
-    .addInputOption(
-      "-mode",
-      "listener",
-      "-latency",
-      "5000", // 5000 microseconds
-      "-scan_all_pmts",
-      "0",
-    )
-    .output(output)
-    .outputFormat("nut");
-
-  command.addOutputOption("-map 0:v");
-  command.videoCodec("copy");
-  command
-    .addOutputOption("-map 0:a?")
-    .audioChannels(2)
-    .audioFrequency(48000)
-    .audioCodec("libopus")
-    .audioBitrate("128k");
-  cancelSignal?.addEventListener("abort", () => command.kill("SIGTERM"), { once: true });
-  command.run();
-  return {
-    command: {
-      ffmpeg: command,
-    },
-    promise: {
-      ffmpeg: ffmpegPromise(command, cancelSignal),
-    },
-    output,
-    host,
-  };
-}
-
-export function ingestRist(port?: number, cancelSignal?: AbortSignal) {
-  const _port = port ?? randomInclusive(40000, 50000);
-  const hostListener = `rist://@localhost:${_port}`;
-  const host = `rist://localhost:${_port}`;
-  const output = new PassThrough();
-  const command = ffmpeg(hostListener);
-  command.addOption("-stats");
-  addLowLatencyFlags(command);
-  command
-    .inputFormat("mpegts")
-    .addInputOption("-buffer_size", "20", "-scan_all_pmts", "0")
-    .output(output)
-    .outputFormat("nut");
-
-  command.addOutputOption("-map 0:v");
-  command.videoCodec("copy");
-  command
-    .addOutputOption("-map 0:a?")
-    .audioChannels(2)
-    .audioFrequency(48000)
-    .audioCodec("libopus")
-    .audioBitrate("128k");
-  cancelSignal?.addEventListener("abort", () => command.kill("SIGTERM"), { once: true });
-  command.run();
-  return {
-    command: {
-      ffmpeg: command,
-    },
-    promise: {
-      ffmpeg: ffmpegPromise(command, cancelSignal),
+      ffmpeg: promise,
     },
     output,
     host,

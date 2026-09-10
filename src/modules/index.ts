@@ -1,4 +1,4 @@
-import type { Message } from "discord.js-selfbot-v13";
+import type { Message } from "@lng2004/discord.js-selfbot-v13";
 import type { Command } from "@commander-js/extra-typings";
 import type { Bot } from "../bot.js";
 

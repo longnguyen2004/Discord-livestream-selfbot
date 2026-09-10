@@ -1,7 +1,7 @@
 import EventEmitter from "node:events";
 import parseArgsStringToArgv from "string-argv";
 import { CommanderError } from "@commander-js/extra-typings";
-import { Client, type Message } from "discord.js-selfbot-v13";
+import { Client, type Message } from "@lng2004/discord.js-selfbot-v13";
 import { glob } from "glob";
 import type { BotCommand, Module } from "./modules/index.js";
 import type { BotConfig } from "./config.js";

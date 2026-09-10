@@ -1,4 +1,4 @@
-import type { Message } from "discord.js-selfbot-v13";
+import type { Message } from "@lng2004/discord.js-selfbot-v13";
 
 export type ReactionHandler = Map<
   string,

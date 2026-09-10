@@ -7,9 +7,10 @@ import * as ytdlp from "./input/yt-dlp.js";
 
 import { createCommand } from "../index.js";
 import { LogLevel } from "../../bot.js";
+import { MessageFlags, StageChannel } from "@lng2004/discord.js-selfbot-v13";
 
-import { MessageFlags, StageChannel } from "discord.js-selfbot-v13";
-import type { Message } from "discord.js-selfbot-v13";
+import type { Module } from "../index.js";
+import type { Message } from "@lng2004/discord.js-selfbot-v13";
 import type { Bot } from "../../bot.js";
 import type { Module } from "../index.js";
 
@@ -248,12 +249,8 @@ export default {
                 flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
               })
               try {
-                const ingestor = {
-                  srt: Ingestor.ingestSrt,
-                  rtmp: Ingestor.ingestRtmp,
-                  rist: Ingestor.ingestRist,
-                } as const;
-                const { command, output, host } = ingestor[opts.protocol](
+                const { command, output, host } = Ingestor.ingest(
+                  opts.protocol,
                   opts.port,
                   signal,
                 );

@@ -1,3 +1,7 @@
+allowBuilds:
+  node-av: set this to true or false
+  zeromq: set this to true or false
+
 ignoredBuiltDependencies:
   - '@biomejs/biome'
   - '@discordjs/opus'
@@ -5,6 +9,9 @@ ignoredBuiltDependencies:
   - esbuild
   - sharp
   - zeromq
+
+minimumReleaseAgeExclude:
+  - '@lng2004/discord.js-selfbot-v13@3.7.2'
 
 onlyBuiltDependencies:
   - '@lng2004/node-datachannel'
