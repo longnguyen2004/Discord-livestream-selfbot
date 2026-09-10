@@ -57,7 +57,7 @@ export default {
   register(bot) {
     const MEDIAMTX_SERVER = "http://localhost:9997/v3";
     const mediaMtx = ky.create({
-      prefixUrl: MEDIAMTX_SERVER,
+      prefix: MEDIAMTX_SERVER,
     });
     return [
       createCommand(

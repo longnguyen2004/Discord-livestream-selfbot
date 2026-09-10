@@ -8,7 +8,7 @@ export function randomInclusive(min: number, max: number) {
 }
 
 /**
- * Required packages: `fluent-ffmpeg`
+ * Required packages: `fluent-ffmpeg-simplified`
  *
  * Required external app: `ffmpeg`
  *
