@@ -1,6 +1,6 @@
 allowBuilds:
+  esbuild: set this to true or false
   node-av: set this to true or false
-  zeromq: set this to true or false
 
 ignoredBuiltDependencies:
   - '@biomejs/biome'
