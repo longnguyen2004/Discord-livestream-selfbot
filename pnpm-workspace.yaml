@@ -12,6 +12,7 @@ ignoredBuiltDependencies:
 
 minimumReleaseAgeExclude:
   - '@lng2004/discord.js-selfbot-v13@3.7.2'
+  - fluent-ffmpeg-simplified@0.2.0
 
 onlyBuiltDependencies:
   - '@lng2004/node-datachannel'

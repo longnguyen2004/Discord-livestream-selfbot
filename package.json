@@ -25,7 +25,7 @@
     "@lng2004/discord.js-selfbot-v13": "^3.7.2",
     "commander": "^15.0.0",
     "execa": "^10.0.1",
-    "fluent-ffmpeg-simplified": "^0.1.0",
+    "fluent-ffmpeg-simplified": "^0.2.0",
     "glob": "^13.0.6",
     "jsonc-parser": "^3.3.1",
     "ky": "^2.1.0",
