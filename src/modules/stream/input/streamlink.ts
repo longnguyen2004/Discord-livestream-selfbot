@@ -77,12 +77,6 @@ export interface StreamlinkLowLatencyOptions {
    */
   retryOpen?: number;
   /**
-   * Pass plugin-specific low-latency flags (`--twitch-low-latency`,
-   * `--kick-low-latency`). These enable HLS segment prefetching on
-   * Twitch/Kick and are ignored for other plugins. Enabled by default.
-   */
-  pluginLowLatency?: boolean;
-  /**
    * Streamlink log level (logs go to stderr, media goes to stdout,
    * so this doesn't affect the piped stream).
    */
@@ -104,7 +98,6 @@ const LOW_LATENCY_DEFAULTS: Required<
   streamTimeout: 15,
   segmentTimeout: 5,
   retryOpen: 2,
-  pluginLowLatency: true,
 };
 
 /**
@@ -119,7 +112,13 @@ const LOW_LATENCY_DEFAULTS: Required<
  * - `--hls-playlist-reload-time live-edge`: poll for new segments faster
  * - `--ringbuffer-size 4M` (vs default 16M): less pre-buffered data
  * - `--stream-timeout 15` / `--stream-segment-timeout 5`: detect stalls faster
- * - `--twitch-low-latency` / `--kick-low-latency`: HLS prefetch on Twitch/Kick
+ *
+ * Note: plugin-specific flags like `--twitch-low-latency` /
+ * `--kick-low-latency` are intentionally NOT passed. Per streamlink's docs
+ * they only set `--hls-segment-stream-data` + `--hls-live-edge 2`, which is
+ * already covered above for every plugin (and `--kick-low-latency` doesn't
+ * exist on older streamlink releases, where it would abort startup with
+ * "unrecognized arguments").
  *
  * The ffmpeg transcoder also gets `minimizeLatency: true`
  * (`-fflags nobuffer -flags lowdelay ...`).
@@ -146,8 +145,6 @@ export function streamlink(
     segmentTimeout:
       streamlinkOptions?.segmentTimeout ?? LOW_LATENCY_DEFAULTS.segmentTimeout,
     retryOpen: streamlinkOptions?.retryOpen ?? LOW_LATENCY_DEFAULTS.retryOpen,
-    pluginLowLatency:
-      streamlinkOptions?.pluginLowLatency ?? LOW_LATENCY_DEFAULTS.pluginLowLatency,
     logLevel: streamlinkOptions?.logLevel ?? "warning",
     extraArgs: streamlinkOptions?.extraArgs ?? [],
   };
@@ -171,9 +168,6 @@ export function streamlink(
     String(opts.segmentTimeout),
     "--retry-open",
     String(opts.retryOpen),
-    ...(opts.pluginLowLatency
-      ? ["--twitch-low-latency", "--kick-low-latency"]
-      : []),
     ...(opts.extraArgs ?? []),
     link,
     quality,
@@ -184,6 +178,10 @@ export function streamlink(
     buffer: { stdout: false },
   })("streamlink", args, { stderr: "inherit" });
   streamlinkProcess.catch(() => {});
+  // An unhandled 'error' event on a stream crashes the bot. Producer-side
+  // failures are already surfaced through the promises below, so swallow
+  // stream errors here (notably EPIPE when ffmpeg exits before streamlink).
+  streamlinkProcess.stdout.on("error", () => {});
   streamlinkProcess.stdout.on("data", () => {});
   const { command, output, promise, controller } = NewApi.prepareStream(
     streamlinkProcess.stdout,
@@ -193,6 +191,23 @@ export function streamlink(
     },
     cancelSignal,
   );
+  // Once the transcoder is gone, stop the producer. Otherwise streamlink
+  // keeps writing into the closed ffmpeg pipe, which raises EPIPE inside
+  // fluent-ffmpeg-simplified's socket handling and crashes the process
+  // (happens on skip/stop, stream end, or transcoder failure).
+  const stopProducer = () => {
+    try {
+      streamlinkProcess.stdout.destroy();
+    } catch {
+      /* already closed */
+    }
+    try {
+      streamlinkProcess.kill("SIGINT");
+    } catch {
+      /* already exited */
+    }
+  };
+  promise.then(stopProducer, stopProducer);
   return {
     output,
     command: {
