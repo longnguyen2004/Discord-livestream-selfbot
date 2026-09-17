@@ -4,6 +4,7 @@ import { prepareStream, playStream, Streamer, Encoders, type Controller } from "
 import { autoRetry } from "./input/autoRetry.js";
 import * as Ingestor from "./input/ingest.js";
 import * as ytdlp from "./input/yt-dlp.js";
+import * as streamlink from "./input/streamlink.js";
 
 import { createCommand } from "../index.js";
 import { LogLevel } from "../../bot.js";
@@ -350,6 +351,98 @@ export default {
                   output,
                   streamer,
                   {
+                    streamPreview: opts.preview
+                  },
+                  signal,
+                );
+                return { controller, promise }
+              } catch (e) {
+                errorHandler(e as Error, bot, message);
+                throw e
+              }
+            }
+          });
+          message.reply(`Added \`${args[0]}\` to the queue`);
+        },
+      ),
+
+      createCommand(
+        addCommonStreamOptions(
+          new Command("streamlink")
+            .description("Play a video using streamlink (low-latency optimized)")
+            .argument("<url>", "The url to play")
+            .option("--list-qualities", "List all the available qualities for this url")
+            .option(
+              "--quality <quality>",
+              "The quality to use (e.g. best, worst, 1080p60, 720p, audio_only). Fallbacks can be comma-separated, e.g. \"1080p60,720p,best\"",
+              "best"
+            )
+            .option(
+              "--height <height>",
+              "Transcode the video to this height.",
+              Number.parseInt,
+              bot.config.height
+            )
+            .option(
+              "--live-edge <segments>",
+              "Number of HLS segments from the live edge to begin streaming. Lower = less latency but more buffering risk",
+              Number.parseInt,
+              2
+            )
+            .option(
+              "--segment-threads <threads>",
+              "Number of parallel segment downloads (1-10)",
+              Number.parseInt,
+              3
+            )
+            .option(
+              "--ringbuffer-size <size>",
+              "Ringbuffer size between streamlink and ffmpeg (e.g. 4M). Smaller = less latency",
+              "4M"
+            )
+            .option(
+              "--no-catchup",
+              "Disable livestream catchup mode (temporarily increases FPS when falling behind)"
+            ),
+        ),
+        async (message, args, opts) => {
+          const url = args[0];
+          if (opts.listQualities) {
+            const qualities = await streamlink.getQualities(url);
+            message.reply(
+              `Qualities for URL \`${url}\`:\n${qualities.map((q) => `- \`${q}\``).join("\n")}`
+            );
+            return;
+          }
+          if (!(await joinRoomIfNeeded(streamer, message, opts.room))) return;
+
+          playlist.queue({
+            info: args[0],
+            stream: (signal: AbortSignal) => {
+              bot.log(message, LogLevel.INFO, {
+                content: `Now playing \`${args[0]}\``,
+                flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
+              })
+              try {
+                const { command, output, controller } = streamlink.streamlink(
+                  url,
+                  opts.quality,
+                  {
+                    ...encoderSettings,
+                    height: opts.height === -1 ? undefined : opts.height,
+                  },
+                  {
+                    hlsLiveEdge: opts.liveEdge,
+                    segmentThreads: opts.segmentThreads,
+                    ringbufferSize: opts.ringbufferSize,
+                  },
+                  signal,
+                );
+                const promise = playStream(
+                  output,
+                  streamer,
+                  {
+                    livestreamCatchup: opts.catchup,
                     streamPreview: opts.preview
                   },
                   signal,
