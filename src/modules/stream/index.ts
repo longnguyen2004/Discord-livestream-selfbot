@@ -215,7 +215,6 @@ export default {
                     stream.output,
                     streamer,
                     {
-                      readrateInitialBurst: opts.livestream ? 10 : undefined,
                       livestreamCatchup: !!opts.livestream,
                       streamPreview: opts.preview
                     },
