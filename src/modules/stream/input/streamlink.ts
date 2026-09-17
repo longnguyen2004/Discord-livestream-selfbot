@@ -121,7 +121,7 @@ const LOW_LATENCY_DEFAULTS: Required<
  * "unrecognized arguments").
  *
  * The ffmpeg transcoder also gets `minimizeLatency: true`
- * (`-fflags nobuffer -flags lowdelay ...`).
+ * (`-fflags nobuffer -flags low_delay ...`)
  */
 export function streamlink(
   link: string,

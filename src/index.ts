@@ -1,9 +1,6 @@
 import { argv } from "node:process";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-// Temporary socket-crash tracer (only active with TRACE_SOCKET_ERRORS=1).
-// Must be imported before anything creates sockets.
-import "./utils/traceSocketErrors.js";
 import { getConfig } from "./config.js";
 import { Bot } from "./bot.js";
 

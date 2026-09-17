@@ -36,12 +36,33 @@ export function ytdlp(
     buffer: { stdout: false },
   })("yt-dlp", args, { stderr: "inherit" });
   ytdlpProcess.catch(() => {});
+  // An unhandled 'error' event on a stream crashes the bot. Producer-side
+  // failures are already surfaced through the promises below, so swallow
+  // stream errors here (notably EPIPE when ffmpeg exits before yt-dlp).
+  ytdlpProcess.stdout.on("error", () => {});
   ytdlpProcess.stdout.on("data", () => {});
   const { command, output, promise, controller } = NewApi.prepareStream(
     ytdlpProcess.stdout,
     encoderOptions,
     cancelSignal,
   );
+  // Once the transcoder is gone, stop the producer. Otherwise yt-dlp keeps
+  // writing into the closed ffmpeg pipe, which raises EPIPE inside
+  // fluent-ffmpeg-simplified's socket handling and crashes the process
+  // (happens on skip/stop, stream end, or transcoder failure).
+  const stopProducer = () => {
+    try {
+      ytdlpProcess.stdout.destroy();
+    } catch {
+      /* already closed */
+    }
+    try {
+      ytdlpProcess.kill("SIGINT");
+    } catch {
+      /* already exited */
+    }
+  };
+  promise.then(stopProducer, stopProducer);
   return {
     output,
     command: {

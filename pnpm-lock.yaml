@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@dank074/discord-video-stream':
-        specifier: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@7d941b9
-        version: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@7d941b9(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@lng2004/discord.js-selfbot-v13@3.7.2(supports-color@7.2.0))(@types/node@24.13.3)(supports-color@7.2.0)
+        specifier: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@b9ac354
+        version: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@b9ac354(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@lng2004/discord.js-selfbot-v13@3.7.2(supports-color@7.2.0))(@types/node@24.13.3)(supports-color@7.2.0)
       '@lng2004/discord.js-selfbot-v13':
         specifier: ^3.7.2
         version: 3.7.2(supports-color@7.2.0)
@@ -128,8 +128,8 @@ packages:
     peerDependencies:
       commander: ~15.0.0
 
-  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@7d941b9':
-    resolution: {integrity: sha512-CWAe1EUbQWFp/R+B3UExZofKRPGukg8zCVTlDSM2Gxcy4piT0flX0bp9XxbvjflJwoomHQzBj3xVvxd6OwvmGA==, tarball: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@7d941b9}
+  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@b9ac354':
+    resolution: {integrity: sha512-nDBmYmrqlpWbdGYmSlMICRk8ZYuBwmrLiSw8gZckXUuVMMsOu3MQZ8LvT1UI7UT65OLlWRE29nQk8WjvCEikZQ==, tarball: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@b9ac354}
     version: 7.0.0
     engines: {node: '>=22.4.0'}
     peerDependencies:
@@ -1084,9 +1084,6 @@ packages:
   flatstr@1.0.12:
     resolution: {integrity: sha512-4zPxDyhCyiN2wIAtSLI6gc82/EjqZc1onI4Mz/l0pWrAlsSfYH/2ZIcU+e3oA2wDwbzIWNKwa23F8rh6+DRWkw==}
 
-  fluent-ffmpeg-simplified@0.1.0:
-    resolution: {integrity: sha512-u3McLUh6H6/hhXYxfZcSGwCJAAlN8wsCCPZjVpaK9HIIvmjOB3G584H3PAWZb/ZQTHVKUrzhjNEYMXZXZjOR+g==}
-
   fluent-ffmpeg-simplified@0.2.0:
     resolution: {integrity: sha512-Y94YMO8HeIZ7tjaGR+srfY+Glu8uJ5HFBr8puvSYhJC6RXWlL+FPe3mJ9QtJkLc1euc0XHKCZL3ARnaVs65yxQ==}
 
@@ -1642,13 +1639,13 @@ snapshots:
     dependencies:
       commander: 15.0.0
 
-  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@7d941b9(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@lng2004/discord.js-selfbot-v13@3.7.2(supports-color@7.2.0))(@types/node@24.13.3)(supports-color@7.2.0)':
+  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@b9ac354(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@lng2004/discord.js-selfbot-v13@3.7.2(supports-color@7.2.0))(@types/node@24.13.3)(supports-color@7.2.0)':
     dependencies:
       '@lng2004/discord.js-selfbot-v13': 3.7.2(supports-color@7.2.0)
       '@lng2004/node-datachannel': 0.33.2-20260825
       '@snazzah/davey': 0.1.12(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)
       debug-level: 4.1.1(supports-color@7.2.0)
-      fluent-ffmpeg-simplified: 0.1.0
+      fluent-ffmpeg-simplified: 0.2.0
       node-av: 6.1.1(supports-color@7.2.0)
       p-debounce: 5.1.0
       sharp: 0.35.4(@types/node@24.13.3)
@@ -2493,11 +2490,6 @@ snapshots:
       path-exists: 4.0.0
 
   flatstr@1.0.12: {}
-
-  fluent-ffmpeg-simplified@0.1.0:
-    dependencies:
-      execa: 9.6.1
-      string-argv: 0.3.2
 
   fluent-ffmpeg-simplified@0.2.0:
     dependencies:
