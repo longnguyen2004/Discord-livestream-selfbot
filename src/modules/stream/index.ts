@@ -216,7 +216,7 @@ export default {
                     stream.output,
                     streamer,
                     {
-                      livestreamCatchup: !!opts.livestream,
+                      isLive: !!opts.livestream,
                       streamPreview: opts.preview
                     },
                     signal,
@@ -399,10 +399,6 @@ export default {
               "--ringbuffer-size <size>",
               "Ringbuffer size between streamlink and ffmpeg (e.g. 4M). Smaller = less latency",
               "4M"
-            )
-            .option(
-              "--no-catchup",
-              "Disable livestream catchup mode (temporarily increases FPS when falling behind)"
             ),
         ),
         async (message, args, opts) => {
@@ -442,7 +438,7 @@ export default {
                   output,
                   streamer,
                   {
-                    livestreamCatchup: opts.catchup,
+                    isLive: true,
                     streamPreview: opts.preview
                   },
                   signal,
