@@ -68,7 +68,7 @@ type StreamItem = {
 }
 type QueueItem = {
   info: string,
-  stream: (signal: AbortSignal) => StreamItem
+  stream: (signal: AbortSignal) => StreamItem | Promise<StreamItem>
 }
 
 class Playlist {
@@ -84,7 +84,7 @@ class Playlist {
       try {
         this._abort?.abort();
         this._abort = new AbortController();
-        this._current = next.stream(this._abort.signal);
+        this._current = await next.stream(this._abort.signal);
         await this._current.promise
       }
       catch {}
@@ -196,13 +196,13 @@ export default {
           {
             playlist.queue({
               info: url,
-              stream: (signal: AbortSignal) => {
+              stream: async (signal: AbortSignal) => {
                 bot.log(message, LogLevel.INFO, {
                   content: `Now playing \`${url}\``,
                   flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
                 })
                 try {
-                  const stream = prepareStream(
+                  const stream = await prepareStream(
                     url,
                     {
                       noTranscoding: !!opts.copy,
@@ -332,13 +332,13 @@ export default {
 
           playlist.queue({
             info: args[0],
-            stream: (signal: AbortSignal) => {
+            stream: async (signal: AbortSignal) => {
               bot.log(message, LogLevel.INFO, {
                 content: `Now playing \`${args[0]}\``,
                 flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
               })
               try {
-                const { command, output, controller } = ytdlp.ytdlp(
+                const { command, output, controller } = await ytdlp.ytdlp(
                   url,
                   opts.format,
                   {
@@ -414,13 +414,13 @@ export default {
 
           playlist.queue({
             info: args[0],
-            stream: (signal: AbortSignal) => {
+            stream: async (signal: AbortSignal) => {
               bot.log(message, LogLevel.INFO, {
                 content: `Now playing \`${args[0]}\``,
                 flags: MessageFlags.FLAGS.SUPPRESS_NOTIFICATIONS
               })
               try {
-                const { command, output, controller } = streamlink.streamlink(
+                const { command, output, controller } = await streamlink.streamlink(
                   url,
                   opts.quality,
                   {

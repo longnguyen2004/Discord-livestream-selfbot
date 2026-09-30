@@ -123,7 +123,7 @@ const LOW_LATENCY_DEFAULTS: Required<
  * The ffmpeg transcoder also gets `minimizeLatency: true`
  * (`-fflags nobuffer -flags low_delay ...`)
  */
-export function streamlink(
+export async function streamlink(
   link: string,
   quality = "best",
   encoderOptions?: Partial<NewApi.PrepareStreamOptions>,
@@ -183,7 +183,7 @@ export function streamlink(
   // stream errors here (notably EPIPE when ffmpeg exits before streamlink).
   streamlinkProcess.stdout.on("error", () => {});
   streamlinkProcess.stdout.on("data", () => {});
-  const { command, output, promise, controller } = NewApi.prepareStream(
+  const { output, promise, controller } = await NewApi.prepareStream(
     streamlinkProcess.stdout,
     {
       minimizeLatency: true,
@@ -212,7 +212,6 @@ export function streamlink(
     output,
     command: {
       streamlink: streamlinkProcess,
-      ffmpeg: command,
     },
     promise: {
       streamlink: streamlinkProcess,

@@ -14,7 +14,7 @@ export async function getFormats(link: string) {
   return JSON.parse(result.slice(1, result.length - 1)) as YtdlpFormat[];
 }
 
-export function ytdlp(
+export async function ytdlp(
   link: string,
   format?: string,
   encoderOptions?: Partial<NewApi.PrepareStreamOptions>,
@@ -41,7 +41,7 @@ export function ytdlp(
   // stream errors here (notably EPIPE when ffmpeg exits before yt-dlp).
   ytdlpProcess.stdout.on("error", () => {});
   ytdlpProcess.stdout.on("data", () => {});
-  const { command, output, promise, controller } = NewApi.prepareStream(
+  const { output, promise, controller } = await NewApi.prepareStream(
     ytdlpProcess.stdout,
     encoderOptions,
     cancelSignal,
@@ -67,7 +67,6 @@ export function ytdlp(
     output,
     command: {
       ytdlp: ytdlpProcess,
-      ffmpeg: command,
     },
     promise: {
       ytdlp: ytdlpProcess,
