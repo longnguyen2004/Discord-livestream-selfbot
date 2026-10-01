@@ -1,7 +1,6 @@
 import { Command, Option } from "@commander-js/extra-typings";
 import { prepareStream, playStream, Streamer, Encoders, type Controller } from "@dank074/discord-video-stream";
 
-import { autoRetry } from "./input/autoRetry.js";
 import * as Ingestor from "./input/ingest.js";
 import * as ytdlp from "./input/yt-dlp.js";
 import * as streamlink from "./input/streamlink.js";
@@ -216,7 +215,7 @@ export default {
                     stream.output,
                     streamer,
                     {
-                      isLive: !!opts.livestream,
+                      readrateInitialBurst: opts.livestream ? 10 : 0,
                       streamPreview: opts.preview
                     },
                     signal,
@@ -438,7 +437,6 @@ export default {
                   output,
                   streamer,
                   {
-                    isLive: true,
                     streamPreview: opts.preview
                   },
                   signal,
