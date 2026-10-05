@@ -13,6 +13,25 @@ import type { Module } from "../index.js";
 import type { Message } from "@lng2004/discord.js-selfbot-v13";
 import type { Bot } from "../../bot.js";
 
+function formatTime(totalSeconds: number): string {
+  const seconds = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  const mm = String(m).padStart(2, "0");
+  const ss = String(s).padStart(2, "0");
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+function parseTime(input: string): number | null {
+  const match = input.match(/^(?:(\d+):)?([0-5]?\d):([0-5]\d)$/);
+  if (!match) return null;
+  const hours = match[1] ? Number.parseInt(match[1], 10) : 0;
+  const minutes = Number.parseInt(match[2], 10);
+  const seconds = Number.parseInt(match[3], 10);
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
 function parseRoom(room: string): { guildId: string; channelId: string } | null {
   const linkMatch = room.match(/https:\/\/discord\.com\/channels\/(\d+)\/(\d+)/);
   if (linkMatch) {
@@ -284,6 +303,15 @@ export default {
                   },
                   async setVolume() {
                     throw new Error("Setting volume for OBS streams isn't allowed at the moment");
+                  },
+                  async seek() {
+                    throw new Error("Seeking for OBS streams isn't allowed at the moment");
+                  },
+                  get position() {
+                    return undefined;
+                  },
+                  get duration() {
+                    return undefined;
                   }
                 }
                 return { controller, promise }
@@ -484,6 +512,55 @@ export default {
           }
           catch (e) {
             msg.reply(`Set volume unsuccessful: \`${(e as Error).message}\``)
+          }
+        }
+      ),
+
+      createCommand(
+        new Command("status").description("Show the current stream status (volume, position, duration)"),
+        async (msg) => {
+          if (!playlist.current) {
+            msg.reply("No stream is currently running");
+            return;
+          }
+          const { controller } = playlist.current;
+          if (!controller) {
+            msg.reply("The current stream doesn't expose its status");
+            return;
+          }
+          const position = controller.position === undefined ? "unknown" : formatTime(controller.position);
+          const duration = controller.duration === undefined ? "unknown" : formatTime(controller.duration);
+          msg.reply(`Volume: ${controller.volume}\nPosition: ${position}\nDuration: ${duration}`);
+        }
+      ),
+
+      createCommand(
+        new Command("seek")
+          .description("Seek to a position in the stream, formatted as (hh:)mm:ss")
+          .argument("<time>", "Target position, formatted as (hh:)mm:ss"),
+        async (msg, args) => {
+          if (!playlist.current) {
+            msg.reply("No stream is currently running");
+            return;
+          }
+          const seconds = parseTime(args[0] as string);
+          if (seconds === null) {
+            msg.reply("Invalid time format. Use (hh:)mm:ss, e.g. `01:30` or `1:01:30`");
+            return;
+          }
+          const { controller } = playlist.current;
+          if (!controller) {
+            msg.reply("The current stream doesn't support seeking");
+            return;
+          }
+          try {
+            if (await controller.seek(seconds))
+              msg.reply(`Seeked to ${formatTime(seconds)}`);
+            else
+              msg.reply("Seek unsuccessful");
+          }
+          catch (e) {
+            msg.reply(`Seek unsuccessful: \`${(e as Error).message}\``);
           }
         }
       ),

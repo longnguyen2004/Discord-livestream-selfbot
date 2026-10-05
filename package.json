@@ -22,7 +22,7 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "@dank074/discord-video-stream": "https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@164129e",
+    "@dank074/discord-video-stream": "https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@9b2f8dc",
     "@lng2004/discord.js-selfbot-v13": "^3.7.2",
     "commander": "^15.0.0",
     "execa": "^10.0.1",

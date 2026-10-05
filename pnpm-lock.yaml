@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@dank074/discord-video-stream':
-        specifier: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@164129e
-        version: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@164129e(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@lng2004/discord.js-selfbot-v13@3.7.2(supports-color@7.2.0))(@types/node@24.13.3)(supports-color@7.2.0)
+        specifier: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@9b2f8dc
+        version: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@9b2f8dc(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@lng2004/discord.js-selfbot-v13@3.7.2(supports-color@7.2.0))(@types/node@24.13.3)(supports-color@7.2.0)
       '@lng2004/discord.js-selfbot-v13':
         specifier: ^3.7.2
         version: 3.7.2(supports-color@7.2.0)
@@ -128,8 +128,8 @@ packages:
     peerDependencies:
       commander: ~15.0.0
 
-  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@164129e':
-    resolution: {integrity: sha512-pQL8bo4c62jLDts/Aoc4FJjEdMEcg0vwGifnl0sTylm5NY4ARu1jKk98STOscAPc7QRy8lW8knL783klojhKSA==, tarball: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@164129e}
+  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@9b2f8dc':
+    resolution: {integrity: sha512-+j107okYZXpgl0nn6LVraoxSjGVhrvy3mvxWsAPHGtPRrkg9YCiFNhv2J6jXxIs4GCTSraZmIO02uyYR0gVRpA==, tarball: https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@9b2f8dc}
     version: 7.0.0
     engines: {node: '>=22.4.0'}
     peerDependencies:
@@ -1477,7 +1477,7 @@ snapshots:
     dependencies:
       commander: 15.0.0
 
-  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@164129e(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@lng2004/discord.js-selfbot-v13@3.7.2(supports-color@7.2.0))(@types/node@24.13.3)(supports-color@7.2.0)':
+  '@dank074/discord-video-stream@https://pkg.pr.new/Discord-RE/Discord-video-stream/@dank074/discord-video-stream@9b2f8dc(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@lng2004/discord.js-selfbot-v13@3.7.2(supports-color@7.2.0))(@types/node@24.13.3)(supports-color@7.2.0)':
     dependencies:
       '@lng2004/discord.js-selfbot-v13': 3.7.2(supports-color@7.2.0)
       '@lng2004/node-datachannel': 0.33.2-20260921
